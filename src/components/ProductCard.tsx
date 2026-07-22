@@ -20,14 +20,17 @@ export function formatIDR(price: number): string {
 
 /**
  * Komponen: Kartu Produk Katalog
- * 
+ *
  * Fitur:
  * - Siluet streetwear dengan aspek rasio gambar portrait 3:4.
  * - Efek hover transisi premium: otomatis berganti dari gambar depan (imageFront)
  *   ke gambar belakang (imageBack) dengan animasi halus!
  * - Label stok menipis dan indicator sizes standar streetwear.
  */
-export default function ProductCard({ product, onOpenDetails }: ProductCardProps) {
+export default function ProductCard({
+  product,
+  onOpenDetails,
+}: ProductCardProps) {
   const isLowStock = product.stock > 0 && product.stock <= 15;
   const isOutOfStock = product.stock === 0;
 
@@ -38,7 +41,6 @@ export default function ProductCard({ product, onOpenDetails }: ProductCardProps
     >
       {/* Container Gambar (Posisi Relatif & Overlapping Grid) */}
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-zinc-100">
-        
         {/* Gambar Depan (Utama) */}
         <img
           src={product.imageFront}
@@ -63,8 +65,8 @@ export default function ProductCard({ product, onOpenDetails }: ProductCardProps
             OUT OF STOCK
           </div>
         ) : isLowStock ? (
-          <div className="absolute top-3 left-3 bg-black/85 text-accent text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded border border-accent/25 flex items-center gap-1 glow-accent z-10">
-            <Flame className="h-3 w-3 text-accent animate-pulse" />
+          <div className="absolute top-3 left-3 bg-primary/85 text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded border border-accent/25 flex items-center gap-1 glow-accent z-10">
+            <Flame className="h-3 w-3 text-white animate-pulse" />
             ONLY {product.stock} LEFT
           </div>
         ) : null}
@@ -92,7 +94,9 @@ export default function ProductCard({ product, onOpenDetails }: ProductCardProps
 
         {/* Varian Ukuran */}
         <div className="pt-2 flex flex-wrap gap-1 items-center">
-          <span className="text-[10px] text-zinc-400 uppercase font-medium mr-1">SIZES:</span>
+          <span className="text-[10px] text-zinc-400 uppercase font-medium mr-1">
+            SIZES:
+          </span>
           {product.sizes.map((size) => (
             <span
               key={size}

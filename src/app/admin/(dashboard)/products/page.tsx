@@ -1,26 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Product, Category } from "@/types";
-import { Plus, Edit2, Trash2, X, Upload, Check, ImageIcon } from "lucide-react";
+import { Product, Category, Collection } from "@/types";
+import { Plus, Edit2, Trash2, X, Upload, ImageIcon, Bookmark } from "lucide-react";
 import { formatIDR } from "@/components/ProductCard";
+import Swal from "sweetalert2";
 
 /**
  * Halaman CRUD Produk Admin
  * Path: /admin/products
  * 
  * Diperbarui:
- * - Tema warna baru: Canvas Putih dengan aksen #002D72 (Deep Blue).
- * - Fitur Unggah Foto (File Upload): mengganti teks input URL dengan input file foto asli.
- * - Mendukung unggah 2 gambar sekaligus (Gambar Depan & Gambar Belakang) yang diubah ke format Base64 secara instan.
- * - Memiliki preview gambar dinamis dalam form modal.
+ * - Penanganan independen fetch data API (kategori, koleksi, produk).
+ * - Dukungan relasi Koleksi (Collection ID).
+ * - SweetAlert2 untuk notifikasi & dialog konfirmasi hapus.
+ * - Unggah foto langsung (Base64) bagian depan & belakang.
  */
 export default function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   // State untuk form overlay modal
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -34,6 +34,7 @@ export default function AdminProducts() {
   const [imageFront, setImageFront] = useState("");
   const [imageBack, setImageBack] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [collectionId, setCollectionId] = useState("");
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
 
   // State loading saat proses encode file
@@ -71,7 +72,7 @@ export default function AdminProducts() {
       setImageFront(base64);
     } catch (err) {
       console.error(err);
-      alert("Gagal membaca file gambar.");
+      Swal.fire({ icon: "error", title: "Gagal!", text: "Gagal membaca file gambar." });
     } finally {
       setUploadingFront(false);
     }
@@ -86,7 +87,7 @@ export default function AdminProducts() {
       setImageBack(base64);
     } catch (err) {
       console.error(err);
-      alert("Gagal membaca file gambar.");
+      Swal.fire({ icon: "error", title: "Gagal!", text: "Gagal membaca file gambar." });
     } finally {
       setUploadingBack(false);
     }
@@ -95,18 +96,29 @@ export default function AdminProducts() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [resProd, resCat] = await Promise.all([
-        fetch("/api/products"),
-        fetch("/api/categories")
+      const [resProd, resCat, resCol] = await Promise.all([
+        fetch("/api/products").catch(() => null),
+        fetch("/api/categories").catch(() => null),
+        fetch("/api/collections").catch(() => null)
       ]);
-      if (resProd.ok && resCat.ok) {
-        setProducts(await resProd.json());
+
+      if (resProd && resProd.ok) {
+        const prodData = await resProd.json();
+        if (Array.isArray(prodData)) setProducts(prodData);
+      }
+      if (resCat && resCat.ok) {
         const catData = await resCat.json();
-        setCategories(catData);
-        if (catData.length > 0) setCategoryId(catData[0].id);
+        if (Array.isArray(catData)) {
+          setCategories(catData);
+          if (catData.length > 0) setCategoryId((prev) => prev || catData[0].id);
+        }
+      }
+      if (resCol && resCol.ok) {
+        const colData = await resCol.json();
+        if (Array.isArray(colData)) setCollections(colData);
       }
     } catch (err) {
-      setError("Gagal mengambil data produk/kategori.");
+      console.error("Fetch data error:", err);
     } finally {
       setLoading(false);
     }
@@ -116,16 +128,6 @@ export default function AdminProducts() {
     fetchData();
   }, []);
 
-  const flashMessage = (type: "success" | "error", msg: string) => {
-    if (type === "success") {
-      setSuccess(msg);
-      setTimeout(() => setSuccess(""), 3000);
-    } else {
-      setError(msg);
-      setTimeout(() => setError(""), 3000);
-    }
-  };
-
   const openAddForm = () => {
     setEditingProduct(null);
     setName("");
@@ -133,8 +135,9 @@ export default function AdminProducts() {
     setStock(20);
     setDescription("");
     setImageFront(PRESET_IMAGES[0].url);
-    setImageBack(PRESET_IMAGES[0].url); // prefill default yang sama
-    if (categories.length > 0) setCategoryId(categories[0].id);
+    setImageBack(PRESET_IMAGES[0].url);
+    setCategoryId(categories.length > 0 ? categories[0].id : "");
+    setCollectionId("");
     setSelectedSizes(["M", "L", "XL"]);
     setIsFormOpen(true);
   };
@@ -148,6 +151,7 @@ export default function AdminProducts() {
     setImageFront(prod.imageFront);
     setImageBack(prod.imageBack || prod.imageFront);
     setCategoryId(prod.categoryId);
+    setCollectionId(prod.collectionId || "");
     setSelectedSizes(prod.sizes);
     setIsFormOpen(true);
   };
@@ -164,7 +168,12 @@ export default function AdminProducts() {
     e.preventDefault();
 
     if (!name.trim() || !imageFront.trim() || !categoryId) {
-      alert("Silakan lengkapi formulir produk wajib (nama, kategori, gambar depan)!");
+      Swal.fire({
+        icon: "warning",
+        title: "Form Belum Lengkap",
+        text: "Silakan lengkapi nama produk, kategori, dan gambar depan wajib!",
+        confirmButtonColor: "#002D72"
+      });
       return;
     }
 
@@ -174,9 +183,10 @@ export default function AdminProducts() {
       price: Number(price),
       stock: Number(stock),
       imageFront: imageFront.trim(),
-      imageBack: imageBack.trim() || imageFront.trim(), // fallback belakang sama dengan depan jika kosong
+      imageBack: imageBack.trim() || imageFront.trim(),
       sizes: selectedSizes.length > 0 ? selectedSizes : ["All Size"],
-      categoryId
+      categoryId,
+      collectionId: collectionId || null
     };
 
     try {
@@ -190,10 +200,16 @@ export default function AdminProducts() {
         const data = await res.json();
         if (res.ok) {
           setProducts(products.map((p) => (p.id === editingProduct.id ? data : p)));
-          flashMessage("success", "Produk berhasil diperbarui!");
           setIsFormOpen(false);
+          Swal.fire({
+            icon: "success",
+            title: "Diperbarui!",
+            text: "Produk berhasil diperbarui.",
+            timer: 2000,
+            showConfirmButton: false
+          });
         } else {
-          flashMessage("error", data.error || "Gagal memperbarui produk.");
+          Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal memperbarui produk." });
         }
       } else {
         const res = await fetch("/api/products", {
@@ -205,33 +221,59 @@ export default function AdminProducts() {
         const data = await res.json();
         if (res.ok) {
           setProducts([data, ...products]);
-          flashMessage("success", `Produk "${data.name}" berhasil ditambahkan!`);
           setIsFormOpen(false);
+          Swal.fire({
+            icon: "success",
+            title: "Berhasil!",
+            text: `Produk "${data.name}" berhasil ditambahkan!`,
+            timer: 2000,
+            showConfirmButton: false
+          });
         } else {
-          flashMessage("error", data.error || "Gagal menambahkan produk.");
+          Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal menambahkan produk." });
         }
       }
     } catch (err) {
-      flashMessage("error", "Koneksi ke API gagal.");
+      console.error(err);
+      Swal.fire({ icon: "error", title: "Kesalahan!", text: "Koneksi ke API gagal." });
     }
   };
 
   const handleDeleteProduct = async (id: string, prodName: string) => {
-    const confirmDelete = window.confirm(`Apakah Anda yakin ingin menghapus produk "${prodName}"?`);
-    if (!confirmDelete) return;
+    const result = await Swal.fire({
+      title: "Hapus Produk?",
+      text: `Apakah Anda yakin ingin menghapus produk "${prodName}"?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#002D72",
+      cancelButtonColor: "#71717a",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+      background: "#ffffff",
+      color: "#18181b"
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
 
       if (res.ok) {
         setProducts(products.filter((p) => p.id !== id));
-        flashMessage("success", `Produk "${prodName}" telah dihapus.`);
+        Swal.fire({
+          icon: "success",
+          title: "Dihapus!",
+          text: `Produk "${prodName}" telah dihapus.`,
+          timer: 2000,
+          showConfirmButton: false
+        });
       } else {
         const data = await res.json();
-        flashMessage("error", data.error || "Gagal menghapus produk.");
+        Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal menghapus produk." });
       }
     } catch (err) {
-      flashMessage("error", "Koneksi gagal.");
+      console.error(err);
+      Swal.fire({ icon: "error", title: "Kesalahan!", text: "Koneksi ke server gagal." });
     }
   };
 
@@ -242,7 +284,7 @@ export default function AdminProducts() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-black text-zinc-900 tracking-wider uppercase">MANAGE PRODUCTS</h2>
-          <p className="text-xs text-zinc-500 mt-1 uppercase">Pengelolaan katalog pakaian dan aksesoris</p>
+          <p className="text-xs text-zinc-500 mt-1 uppercase">Pengelolaan katalog pakaian, aksesoris, dan koleksi</p>
         </div>
         <button
           onClick={openAddForm}
@@ -252,19 +294,7 @@ export default function AdminProducts() {
         </button>
       </div>
 
-      {/* Status */}
-      {success && (
-        <div className="rounded border border-green-500/20 bg-green-500/10 p-3 text-xs font-semibold text-green-600">
-          {success}
-        </div>
-      )}
-      {error && (
-        <div className="rounded border border-red-500/20 bg-red-500/10 p-3 text-xs font-semibold text-red-600">
-          {error}
-        </div>
-      )}
-
-      {/* Tabel */}
+      {/* Tabel Produk */}
       <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden shadow-sm">
         <div className="px-6 py-5 border-b border-zinc-200 bg-zinc-50/50">
           <h3 className="text-xs font-black text-zinc-800 tracking-widest uppercase">DAFTAR KATALOG</h3>
@@ -285,6 +315,7 @@ export default function AdminProducts() {
                 <tr className="border-b border-zinc-200 text-zinc-500 font-black uppercase tracking-wider bg-zinc-50">
                   <th className="px-6 py-4">Gambar & Nama</th>
                   <th className="px-6 py-4">Kategori</th>
+                  <th className="px-6 py-4">Koleksi</th>
                   <th className="px-6 py-4">Harga</th>
                   <th className="px-6 py-4">Stok</th>
                   <th className="px-6 py-4">Varian Ukuran</th>
@@ -294,6 +325,8 @@ export default function AdminProducts() {
               <tbody className="divide-y divide-zinc-200">
                 {products.map((prod) => {
                   const catName = categories.find((c) => c.id === prod.categoryId)?.name || "Lainnya";
+                  const colName = collections.find((col) => col.id === prod.collectionId)?.name;
+
                   return (
                     <tr key={prod.id} className="hover:bg-zinc-50 transition-colors">
                       <td className="px-6 py-4 flex items-center gap-3">
@@ -305,6 +338,16 @@ export default function AdminProducts() {
 
                       <td className="px-6 py-4 text-zinc-500 font-bold uppercase text-[10px] tracking-wide">
                         {catName}
+                      </td>
+
+                      <td className="px-6 py-4">
+                        {colName ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold bg-primary/10 text-primary uppercase">
+                            <Bookmark className="h-3 w-3" /> {colName}
+                          </span>
+                        ) : (
+                          <span className="text-zinc-400 text-[10px] font-mono">-</span>
+                        )}
                       </td>
 
                       <td className="px-6 py-4 text-zinc-700 font-bold">
@@ -378,7 +421,7 @@ export default function AdminProducts() {
             <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-6 flex-grow">
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
+                <div className="space-y-1 sm:col-span-2">
                   <label className="text-[10px] font-bold text-zinc-500 uppercase">Nama Produk *</label>
                   <input
                     type="text"
@@ -391,7 +434,7 @@ export default function AdminProducts() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase">Kategori *</label>
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase">Kategori Produk *</label>
                   <select
                     value={categoryId}
                     onChange={(e) => setCategoryId(e.target.value)}
@@ -399,12 +442,26 @@ export default function AdminProducts() {
                     required
                   >
                     {categories.length === 0 ? (
-                      <option disabled>Buat kategori terlebih dahulu</option>
+                      <option disabled value="">Buat kategori terlebih dahulu</option>
                     ) : (
                       categories.map((cat) => (
                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                       ))
                     )}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase">Koleksi (Opsional)</label>
+                  <select
+                    value={collectionId}
+                    onChange={(e) => setCollectionId(e.target.value)}
+                    className="w-full bg-white border border-zinc-200 rounded px-3 py-2.5 text-xs text-zinc-800 focus:outline-none focus:border-primary"
+                  >
+                    <option value="">Tanpa Koleksi</option>
+                    {collections.map((col) => (
+                      <option key={col.id} value={col.id}>{col.name}</option>
+                    ))}
                   </select>
                 </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FolderKanban, ShoppingBag, Layers, ExternalLink, Info, CheckCircle2 } from "lucide-react";
+import { FolderKanban, ShoppingBag, Layers, Bookmark, ExternalLink, Info, CheckCircle2 } from "lucide-react";
 import { DashboardStats, Product } from "@/types";
 import { formatIDR } from "@/components/ProductCard";
 import Link from "next/link";
@@ -17,6 +17,7 @@ export default function AdminDashboard() {
     totalCategories: 0,
     totalProducts: 0,
     totalStock: 0,
+    totalCollections: 0,
   });
   const [recentProducts, setRecentProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -90,7 +91,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Grid Card Statistik */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Card Kategori */}
         <div className="bg-zinc-50 border border-zinc-200 p-6 rounded-lg space-y-4 hover:border-zinc-300 transition-colors shadow-sm">
           <div className="flex items-center justify-between">
@@ -128,6 +129,20 @@ export default function AdminDashboard() {
           <div className="flex items-baseline justify-between">
             <span className="text-3xl font-black text-zinc-900">{stats.totalStock}</span>
             <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Unit Barang</span>
+          </div>
+        </div>
+
+        {/* Card Koleksi */}
+        <div className="bg-zinc-50 border border-zinc-200 p-6 rounded-lg space-y-4 hover:border-zinc-300 transition-colors shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-zinc-500 tracking-wider uppercase">Total Koleksi</span>
+            <Bookmark className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex items-baseline justify-between">
+            <span className="text-3xl font-black text-zinc-900">{stats.totalCollections || 0}</span>
+            <Link href="/admin/collections" className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1 uppercase">
+              KOLEKSI <ExternalLink className="h-3 w-3" />
+            </Link>
           </div>
         </div>
       </div>

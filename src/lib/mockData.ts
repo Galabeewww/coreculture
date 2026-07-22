@@ -1,4 +1,4 @@
-import { Category, Product } from "@/types";
+import { Category, Collection, Product } from "@/types";
 
 // Kategori awal untuk katalog streetwear CORECULTURE
 export const INITIAL_CATEGORIES: Category[] = [
@@ -6,6 +6,22 @@ export const INITIAL_CATEGORIES: Category[] = [
   { id: "cat-2", name: "Celana", slug: "celana" },
   { id: "cat-3", name: "Jaket", slug: "jaket" },
   { id: "cat-4", name: "Aksesoris", slug: "aksesoris" }
+];
+
+// Koleksi awal bertema kolaborasi eksklusif
+export const INITIAL_COLLECTIONS: Collection[] = [
+  { 
+    id: "col-1", 
+    name: "Croire Collaboration", 
+    slug: "croire-collaboration", 
+    description: "Rilisan streetwear eksklusif hasil kolaborasi dengan label fashion indie Croire. Menampilkan warna monokromatik dan potongan avant-garde." 
+  },
+  { 
+    id: "col-2", 
+    name: "Cyberpunk Syndicate", 
+    slug: "cyberpunk-syndicate", 
+    description: "Koleksi bertema distopia urban futuristik dengan detail grafis reflektif dan siluet techwear taktis." 
+  }
 ];
 
 // Produk awal bertema streetwear premium dengan gambar depan dan belakang dari Unsplash
@@ -20,7 +36,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     imageFront: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=600",
     imageBack: "https://images.unsplash.com/photo-1503342394128-c104d54dba01?q=80&w=600",
     sizes: ["S", "M", "L", "XL"],
-    categoryId: "cat-1"
+    categoryId: "cat-1",
+    collectionId: "col-1" // terhubung ke kolaborasi Croire
   },
   {
     id: "prod-2",
@@ -32,7 +49,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     imageFront: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=600",
     imageBack: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=600",
     sizes: ["M", "L", "XL"],
-    categoryId: "cat-1"
+    categoryId: "cat-1",
+    collectionId: "col-2" // terhubung ke Cyberpunk Syndicate
   },
   {
     id: "prod-3",
@@ -44,7 +62,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     imageFront: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=600",
     imageBack: "https://images.unsplash.com/photo-1517423568366-8b83523034fd?q=80&w=600",
     sizes: ["28", "30", "32", "34"],
-    categoryId: "cat-2"
+    categoryId: "cat-2",
+    collectionId: null
   },
   {
     id: "prod-4",
@@ -56,7 +75,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     imageFront: "https://images.unsplash.com/photo-1517423568366-8b83523034fd?q=80&w=600",
     imageBack: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=600",
     sizes: ["30", "32", "34"],
-    categoryId: "cat-2"
+    categoryId: "cat-2",
+    collectionId: null
   },
   {
     id: "prod-5",
@@ -68,7 +88,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     imageFront: "https://images.unsplash.com/photo-1611312449412-6cefac5dc3e4?q=80&w=600",
     imageBack: "https://images.unsplash.com/photo-1611312449412-6cefac5dc3e4?q=80&w=600",
     sizes: ["M", "L", "XL"],
-    categoryId: "cat-3"
+    categoryId: "cat-3",
+    collectionId: "col-1" // terhubung ke kolaborasi Croire
   },
   {
     id: "prod-6",
@@ -80,7 +101,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     imageFront: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=600",
     imageBack: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=600",
     sizes: ["S", "M", "L", "XL"],
-    categoryId: "cat-3"
+    categoryId: "cat-3",
+    collectionId: null
   },
   {
     id: "prod-7",
@@ -92,7 +114,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     imageFront: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=600",
     imageBack: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=600",
     sizes: ["All Size"],
-    categoryId: "cat-4"
+    categoryId: "cat-4",
+    collectionId: null
   },
   {
     id: "prod-8",
@@ -104,6 +127,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     imageFront: "https://images.unsplash.com/photo-1534215754734-18e55d13e346?q=80&w=600",
     imageBack: "https://images.unsplash.com/photo-1534215754734-18e55d13e346?q=80&w=600",
     sizes: ["All Size"],
-    categoryId: "cat-4"
+    categoryId: "cat-4",
+    collectionId: null
   }
 ];

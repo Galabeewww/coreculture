@@ -3,18 +3,17 @@
 import { useEffect, useState } from "react";
 import { Category } from "@/types";
 import { Plus, Edit2, Trash2, X, Check } from "lucide-react";
+import Swal from "sweetalert2";
 
 /**
  * Halaman Manajemen Kategori (CRUD)
  * Path: /admin/categories
  * 
- * Diperbarui ke tema warna baru: Canvas Putih dengan aksen #002D72 (Deep Blue).
+ * Diperbarui dengan SweetAlert2 untuk konfirmasi hapus dan notifikasi pop-up.
  */
 export default function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const [newCatName, setNewCatName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -28,7 +27,13 @@ export default function AdminCategories() {
         setCategories(await res.json());
       }
     } catch (err) {
-      setError("Gagal memuat kategori.");
+      console.error(err);
+      Swal.fire({
+        icon: "error",
+        title: "Gagal Memuat!",
+        text: "Terjadi kesalahan saat mengambil data kategori.",
+        confirmButtonColor: "#002D72",
+      });
     } finally {
       setLoading(false);
     }
@@ -37,16 +42,6 @@ export default function AdminCategories() {
   useEffect(() => {
     fetchCategories();
   }, []);
-
-  const flashMessage = (type: "success" | "error", msg: string) => {
-    if (type === "success") {
-      setSuccess(msg);
-      setTimeout(() => setSuccess(""), 3000);
-    } else {
-      setError(msg);
-      setTimeout(() => setError(""), 3000);
-    }
-  };
 
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,12 +59,29 @@ export default function AdminCategories() {
       if (res.ok) {
         setCategories([...categories, data]);
         setNewCatName("");
-        flashMessage("success", `Kategori "${data.name}" berhasil dibuat!`);
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: `Kategori "${data.name}" berhasil dibuat.`,
+          timer: 2000,
+          showConfirmButton: false,
+        });
       } else {
-        flashMessage("error", data.error || "Gagal membuat kategori.");
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: data.error || "Gagal membuat kategori.",
+          confirmButtonColor: "#002D72",
+        });
       }
     } catch (err) {
-      flashMessage("error", "Koneksi gagal.");
+      console.error(err);
+      Swal.fire({
+        icon: "error",
+        title: "Kesalahan!",
+        text: "Terjadi kesalahan koneksi server.",
+        confirmButtonColor: "#002D72",
+      });
     }
   };
 
@@ -93,33 +105,77 @@ export default function AdminCategories() {
       if (res.ok) {
         setCategories(categories.map((c) => (c.id === id ? data : c)));
         setEditingId(null);
-        flashMessage("success", "Kategori berhasil diperbarui!");
+        Swal.fire({
+          icon: "success",
+          title: "Diperbarui!",
+          text: "Kategori berhasil diperbarui.",
+          timer: 2000,
+          showConfirmButton: false,
+        });
       } else {
-        flashMessage("error", data.error || "Gagal memperbarui kategori.");
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: data.error || "Gagal memperbarui kategori.",
+          confirmButtonColor: "#002D72",
+        });
       }
     } catch (err) {
-      flashMessage("error", "Koneksi gagal.");
+      console.error(err);
+      Swal.fire({
+        icon: "error",
+        title: "Kesalahan!",
+        text: "Terjadi kesalahan server.",
+        confirmButtonColor: "#002D72",
+      });
     }
   };
 
   const handleDeleteCategory = async (id: string, name: string) => {
-    const confirmDelete = window.confirm(
-      `Apakah Anda yakin ingin menghapus kategori "${name}"? Tindakan ini akan menghapus SEMUA produk yang berada di kategori ini secara permanen!`
-    );
-    if (!confirmDelete) return;
+    const result = await Swal.fire({
+      title: "Hapus Kategori?",
+      text: `Apakah Anda yakin ingin menghapus kategori "${name}"? Tindakan ini akan menghapus SEMUA produk di dalamnya secara permanen!`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#002D72",
+      cancelButtonColor: "#71717a",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+      background: "#ffffff",
+      color: "#18181b",
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
 
       if (res.ok) {
         setCategories(categories.filter((c) => c.id !== id));
-        flashMessage("success", `Kategori "${name}" telah dihapus.`);
+        Swal.fire({
+          icon: "success",
+          title: "Dihapus!",
+          text: `Kategori "${name}" telah dihapus.`,
+          timer: 2000,
+          showConfirmButton: false,
+        });
       } else {
         const data = await res.json();
-        flashMessage("error", data.error || "Gagal menghapus kategori.");
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: data.error || "Gagal menghapus kategori.",
+          confirmButtonColor: "#002D72",
+        });
       }
     } catch (err) {
-      flashMessage("error", "Koneksi gagal.");
+      console.error(err);
+      Swal.fire({
+        icon: "error",
+        title: "Kesalahan!",
+        text: "Terjadi kesalahan server.",
+        confirmButtonColor: "#002D72",
+      });
     }
   };
 
@@ -130,17 +186,6 @@ export default function AdminCategories() {
         <h2 className="text-2xl font-black text-zinc-900 tracking-wider uppercase">MANAGE CATEGORIES</h2>
         <p className="text-xs text-zinc-500 mt-1 uppercase">Pengelolaan kategori jenis produk katalog</p>
       </div>
-
-      {success && (
-        <div className="rounded border border-green-500/20 bg-green-500/10 p-3 text-xs font-semibold text-green-600">
-          {success}
-        </div>
-      )}
-      {error && (
-        <div className="rounded border border-red-500/20 bg-red-500/10 p-3 text-xs font-semibold text-red-600">
-          {error}
-        </div>
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
