@@ -66,7 +66,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
     <div className="flex flex-col min-h-screen bg-white text-zinc-950">
       <Navbar />
 
-      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 w-full flex-grow">
+      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 w-full flex-grow animate-fade-in-up">
         {/* Breadcrumb navigasi */}
         <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-8">
           <Link href="/" className="hover:text-primary transition-colors">Home</Link>

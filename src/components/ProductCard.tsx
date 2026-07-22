@@ -37,7 +37,7 @@ export default function ProductCard({
   return (
     <div
       onClick={() => onOpenDetails(product)}
-      className="group relative cursor-pointer flex flex-col bg-white border border-zinc-200 overflow-hidden hover:border-zinc-400 transition-all duration-300 rounded-lg shadow-sm"
+      className="group relative cursor-pointer flex flex-col bg-white border border-zinc-200 overflow-hidden hover:border-zinc-400 transition-all duration-300 rounded-lg shadow-sm hover-lift"
     >
       {/* Container Gambar (Posisi Relatif & Overlapping Grid) */}
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-zinc-100">

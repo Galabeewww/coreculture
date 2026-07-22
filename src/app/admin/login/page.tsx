@@ -48,7 +48,7 @@ export default function AdminLogin() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 sm:px-6 lg:px-8">
       {/* Box Login */}
-      <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl border border-zinc-200 shadow-2xl relative overflow-hidden">
+      <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl border border-zinc-200 shadow-2xl relative overflow-hidden animate-scale-in">
         
         {/* Line Aksen Deep Blue */}
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-primary" />

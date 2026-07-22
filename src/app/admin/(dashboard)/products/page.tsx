@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Product, Category, Collection } from "@/types";
-import { Plus, Edit2, Trash2, X, Upload, ImageIcon, Bookmark } from "lucide-react";
+import { Plus, Edit2, Trash2, X, Upload, Bookmark } from "lucide-react";
 import { formatIDR } from "@/components/ProductCard";
 import Swal from "sweetalert2";
 
@@ -43,13 +43,7 @@ export default function AdminProducts() {
 
   const SIZE_OPTIONS = ["S", "M", "L", "XL", "28", "30", "32", "34", "All Size"];
 
-  // Preset Gambar opsional (Unsplash) untuk pengisian cepat saat demo/testing
-  const PRESET_IMAGES = [
-    { label: "Black Tee", url: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=600" },
-    { label: "White Tee", url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=600" },
-    { label: "Cargo Pants", url: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=600" },
-    { label: "Denim Pants", url: "https://images.unsplash.com/photo-1517423568366-8b83523034fd?q=80&w=600" }
-  ];
+
 
   // Konversi berkas unggahan ke Base64
   const processFile = (file: File): Promise<string> => {
@@ -69,10 +63,21 @@ export default function AdminProducts() {
     setUploadingFront(true);
     try {
       const base64 = await processFile(file);
-      setImageFront(base64);
+      // Upload ke Cloudinary via API
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: base64 }),
+      });
+      if (res.ok) {
+        const { url } = await res.json();
+        setImageFront(url || base64);
+      } else {
+        setImageFront(base64);
+      }
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Gagal!", text: "Gagal membaca file gambar." });
+      Swal.fire({ icon: "error", title: "Gagal!", text: "Gagal membaca/mengunggah file gambar." });
     } finally {
       setUploadingFront(false);
     }
@@ -84,10 +89,21 @@ export default function AdminProducts() {
     setUploadingBack(true);
     try {
       const base64 = await processFile(file);
-      setImageBack(base64);
+      // Upload ke Cloudinary via API
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: base64 }),
+      });
+      if (res.ok) {
+        const { url } = await res.json();
+        setImageBack(url || base64);
+      } else {
+        setImageBack(base64);
+      }
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Gagal!", text: "Gagal membaca file gambar." });
+      Swal.fire({ icon: "error", title: "Gagal!", text: "Gagal membaca/mengunggah file gambar." });
     } finally {
       setUploadingBack(false);
     }
@@ -134,8 +150,8 @@ export default function AdminProducts() {
     setPrice(199000);
     setStock(20);
     setDescription("");
-    setImageFront(PRESET_IMAGES[0].url);
-    setImageBack(PRESET_IMAGES[0].url);
+    setImageFront("");
+    setImageBack("");
     setCategoryId(categories.length > 0 ? categories[0].id : "");
     setCollectionId("");
     setSelectedSizes(["M", "L", "XL"]);
@@ -569,25 +585,7 @@ export default function AdminProducts() {
                   </div>
                 </div>
 
-                {/* Preset Gambar Cepat untuk Demo */}
-                <div className="space-y-1.5 bg-zinc-50 p-3 rounded border border-zinc-100">
-                  <div className="flex items-center gap-1">
-                    <ImageIcon className="h-3.5 w-3.5 text-zinc-500" />
-                    <span className="text-[9px] font-bold text-zinc-500 uppercase">Demo Preset (Klik untuk Isi Cepat):</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {PRESET_IMAGES.map((img) => (
-                      <button
-                        key={img.label}
-                        type="button"
-                        onClick={() => { setImageFront(img.url); setImageBack(img.url); }}
-                        className="text-[9px] px-2 py-1 bg-white border border-zinc-200 rounded font-semibold text-zinc-600 hover:border-primary transition-colors cursor-pointer"
-                      >
-                        {img.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+
               </div>
 
               {/* Varian Ukuran */}

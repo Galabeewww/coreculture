@@ -102,7 +102,7 @@ export default function Home() {
         {/* Overlay gradasi biru-hitam premium */}
         <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-black/40 to-black/20" />
 
-        <div className="relative z-10 text-center space-y-6 px-4">
+        <div className="relative z-10 text-center space-y-6 px-4 animate-fade-in-up">
           <span className="text-[11px] font-black tracking-[0.4em] text-white uppercase animate-pulse">
             NEW DROP ARRIVAL
           </span>
@@ -124,7 +124,7 @@ export default function Home() {
       </header>
 
       {/* 2. CATALOGUE */}
-      <main id="katalog" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 w-full scroll-mt-20">
+      <main id="katalog" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 w-full scroll-mt-20 animate-fade-in-up">
         
         <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-zinc-200 pb-6 mb-8 gap-4">
           <div>

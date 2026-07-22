@@ -93,7 +93,7 @@ export default function AdminDashboard() {
       {/* Grid Card Statistik */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Card Kategori */}
-        <div className="bg-zinc-50 border border-zinc-200 p-6 rounded-lg space-y-4 hover:border-zinc-300 transition-colors shadow-sm">
+        <div className="bg-zinc-50 border border-zinc-200 p-6 rounded-lg space-y-4 hover:border-zinc-300 transition-colors shadow-sm hover-lift animate-fade-in-up">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-zinc-500 tracking-wider uppercase">Total Kategori</span>
             <FolderKanban className="h-5 w-5 text-primary" />
@@ -107,7 +107,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Card Produk */}
-        <div className="bg-zinc-50 border border-zinc-200 p-6 rounded-lg space-y-4 hover:border-zinc-300 transition-colors shadow-sm">
+        <div className="bg-zinc-50 border border-zinc-200 p-6 rounded-lg space-y-4 hover:border-zinc-300 transition-colors shadow-sm hover-lift animate-fade-in-up stagger-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-zinc-500 tracking-wider uppercase">Total Produk</span>
             <ShoppingBag className="h-5 w-5 text-primary" />
@@ -121,7 +121,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Card Total Stok */}
-        <div className="bg-zinc-50 border border-zinc-200 p-6 rounded-lg space-y-4 hover:border-zinc-300 transition-colors shadow-sm">
+        <div className="bg-zinc-50 border border-zinc-200 p-6 rounded-lg space-y-4 hover:border-zinc-300 transition-colors shadow-sm hover-lift animate-fade-in-up stagger-4">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-zinc-500 tracking-wider uppercase">Total Unit Stok</span>
             <Layers className="h-5 w-5 text-primary" />
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Card Koleksi */}
-        <div className="bg-zinc-50 border border-zinc-200 p-6 rounded-lg space-y-4 hover:border-zinc-300 transition-colors shadow-sm">
+        <div className="bg-zinc-50 border border-zinc-200 p-6 rounded-lg space-y-4 hover:border-zinc-300 transition-colors shadow-sm hover-lift animate-fade-in-up stagger-6">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-zinc-500 tracking-wider uppercase">Total Koleksi</span>
             <Bookmark className="h-5 w-5 text-primary" />

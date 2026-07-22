@@ -1,21 +1,11 @@
-import { createClient } from "@supabase/supabase-js";
 import { Category, Collection, Product, DashboardStats } from "@/types";
 import { INITIAL_CATEGORIES, INITIAL_COLLECTIONS, INITIAL_PRODUCTS } from "./mockData";
+import prisma from "./prisma";
 
-// Ambil variabel environment Supabase
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+// Cek apakah DATABASE_URL dikonfigurasi di variabel lingkungan (.env)
+export const isPrismaConfigured = Boolean(process.env.DATABASE_URL);
 
-// Cek apakah kredensial Supabase tersedia
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
-
-// Inisialisasi Supabase client (hanya jika dikonfigurasi)
-export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null;
-
-// PENTING: Untuk keperluan serverless di Next.js, jika tidak memakai DB fisik,
-// kita simpan state mock di variabel global agar tidak ke-reset saat hot reload di development lokal.
+// In-Memory Storage Fallback (untuk dev tanpa DB fisik)
 interface GlobalStorage {
   categories: Category[];
   collections: Collection[];
@@ -39,26 +29,24 @@ const store = globalForDb.dbStore;
 // ==========================================
 
 export async function getCategories(): Promise<Category[]> {
-  if (supabase) {
+  if (isPrismaConfigured) {
     try {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("*")
-        .order("name", { ascending: true });
-      
-      if (!error && data && data.length > 0) {
-        return data.map(item => ({
+      const data = await prisma.category.findMany({
+        orderBy: { name: "asc" },
+      });
+      if (data && data.length > 0) {
+        return data.map((item) => ({
           id: item.id,
           name: item.name,
           slug: item.slug,
-          createdAt: item.created_at
+          createdAt: item.createdAt.toISOString(),
         }));
       }
     } catch (err) {
-      console.error("Supabase exception (getCategories):", err);
+      console.error("Prisma exception (getCategories):", err);
     }
   }
-  
+
   return store.categories;
 }
 
@@ -71,27 +59,21 @@ export async function createCategory(name: string): Promise<Category> {
     createdAt: new Date().toISOString(),
   };
 
-  if (supabase) {
+  if (isPrismaConfigured) {
     try {
-      const { data, error } = await supabase
-        .from("categories")
-        .insert([{ name, slug }])
-        .select()
-        .single();
-
-      if (!error && data) {
-        const cat: Category = {
-          id: data.id,
-          name: data.name,
-          slug: data.slug,
-          createdAt: data.created_at
-        };
-        store.categories.push(cat);
-        return cat;
-      }
-      console.error("Supabase error (createCategory):", error);
+      const data = await prisma.category.create({
+        data: { name, slug },
+      });
+      const cat: Category = {
+        id: data.id,
+        name: data.name,
+        slug: data.slug,
+        createdAt: data.createdAt.toISOString(),
+      };
+      store.categories.push(cat);
+      return cat;
     } catch (err) {
-      console.error("Supabase exception (createCategory):", err);
+      console.error("Prisma exception (createCategory):", err);
     }
   }
 
@@ -101,34 +83,28 @@ export async function createCategory(name: string): Promise<Category> {
 
 export async function updateCategory(id: string, name: string): Promise<Category | null> {
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
-  
-  if (supabase) {
-    try {
-      const { data, error } = await supabase
-        .from("categories")
-        .update({ name, slug })
-        .eq("id", id)
-        .select()
-        .single();
 
-      if (!error && data) {
-        const cat: Category = {
-          id: data.id,
-          name: data.name,
-          slug: data.slug,
-          createdAt: data.created_at
-        };
-        const idx = store.categories.findIndex(c => c.id === id);
-        if (idx !== -1) store.categories[idx] = cat;
-        return cat;
-      }
-      console.error("Supabase error (updateCategory):", error);
+  if (isPrismaConfigured) {
+    try {
+      const data = await prisma.category.update({
+        where: { id },
+        data: { name, slug },
+      });
+      const cat: Category = {
+        id: data.id,
+        name: data.name,
+        slug: data.slug,
+        createdAt: data.createdAt.toISOString(),
+      };
+      const idx = store.categories.findIndex((c) => c.id === id);
+      if (idx !== -1) store.categories[idx] = cat;
+      return cat;
     } catch (err) {
-      console.error("Supabase exception (updateCategory):", err);
+      console.error("Prisma exception (updateCategory):", err);
     }
   }
 
-  const idx = store.categories.findIndex(c => c.id === id);
+  const idx = store.categories.findIndex((c) => c.id === id);
   if (idx !== -1) {
     store.categories[idx] = {
       ...store.categories[idx],
@@ -141,29 +117,22 @@ export async function updateCategory(id: string, name: string): Promise<Category
 }
 
 export async function deleteCategory(id: string): Promise<boolean> {
-  if (supabase) {
+  if (isPrismaConfigured) {
     try {
-      const { error } = await supabase
-        .from("categories")
-        .delete()
-        .eq("id", id);
-
-      if (!error) {
-        const idx = store.categories.findIndex(c => c.id === id);
-        if (idx !== -1) store.categories.splice(idx, 1);
-        store.products = store.products.filter(p => p.categoryId !== id);
-        return true;
-      }
-      console.error("Supabase error (deleteCategory):", error);
+      await prisma.category.delete({ where: { id } });
+      const idx = store.categories.findIndex((c) => c.id === id);
+      if (idx !== -1) store.categories.splice(idx, 1);
+      store.products = store.products.filter((p) => p.categoryId !== id);
+      return true;
     } catch (err) {
-      console.error("Supabase exception (deleteCategory):", err);
+      console.error("Prisma exception (deleteCategory):", err);
     }
   }
 
-  const idx = store.categories.findIndex(c => c.id === id);
+  const idx = store.categories.findIndex((c) => c.id === id);
   if (idx !== -1) {
     store.categories.splice(idx, 1);
-    store.products = store.products.filter(p => p.categoryId !== id);
+    store.products = store.products.filter((p) => p.categoryId !== id);
     return true;
   }
   return false;
@@ -174,27 +143,25 @@ export async function deleteCategory(id: string): Promise<boolean> {
 // ==========================================
 
 export async function getCollections(): Promise<Collection[]> {
-  if (supabase) {
+  if (isPrismaConfigured) {
     try {
-      const { data, error } = await supabase
-        .from("collections")
-        .select("*")
-        .order("name", { ascending: true });
-      
-      if (!error && data && data.length > 0) {
-        return data.map(item => ({
+      const data = await prisma.collection.findMany({
+        orderBy: { name: "asc" },
+      });
+      if (data && data.length > 0) {
+        return data.map((item) => ({
           id: item.id,
           name: item.name,
           slug: item.slug,
           description: item.description || "",
-          createdAt: item.created_at
+          createdAt: item.createdAt.toISOString(),
         }));
       }
     } catch (err) {
-      console.error("Supabase exception (getCollections):", err);
+      console.error("Prisma exception (getCollections):", err);
     }
   }
-  
+
   return store.collections;
 }
 
@@ -208,28 +175,22 @@ export async function createCollection(name: string, description: string): Promi
     createdAt: new Date().toISOString(),
   };
 
-  if (supabase) {
+  if (isPrismaConfigured) {
     try {
-      const { data, error } = await supabase
-        .from("collections")
-        .insert([{ name, slug, description }])
-        .select()
-        .single();
-
-      if (!error && data) {
-        const col: Collection = {
-          id: data.id,
-          name: data.name,
-          slug: data.slug,
-          description: data.description || "",
-          createdAt: data.created_at
-        };
-        store.collections.push(col);
-        return col;
-      }
-      console.error("Supabase error (createCollection):", error);
+      const data = await prisma.collection.create({
+        data: { name, slug, description },
+      });
+      const col: Collection = {
+        id: data.id,
+        name: data.name,
+        slug: data.slug,
+        description: data.description || "",
+        createdAt: data.createdAt.toISOString(),
+      };
+      store.collections.push(col);
+      return col;
     } catch (err) {
-      console.error("Supabase exception (createCollection):", err);
+      console.error("Prisma exception (createCollection):", err);
     }
   }
 
@@ -239,35 +200,29 @@ export async function createCollection(name: string, description: string): Promi
 
 export async function updateCollection(id: string, name: string, description: string): Promise<Collection | null> {
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
-  
-  if (supabase) {
-    try {
-      const { data, error } = await supabase
-        .from("collections")
-        .update({ name, slug, description })
-        .eq("id", id)
-        .select()
-        .single();
 
-      if (!error && data) {
-        const col: Collection = {
-          id: data.id,
-          name: data.name,
-          slug: data.slug,
-          description: data.description || "",
-          createdAt: data.created_at
-        };
-        const idx = store.collections.findIndex(c => c.id === id);
-        if (idx !== -1) store.collections[idx] = col;
-        return col;
-      }
-      console.error("Supabase error (updateCollection):", error);
+  if (isPrismaConfigured) {
+    try {
+      const data = await prisma.collection.update({
+        where: { id },
+        data: { name, slug, description },
+      });
+      const col: Collection = {
+        id: data.id,
+        name: data.name,
+        slug: data.slug,
+        description: data.description || "",
+        createdAt: data.createdAt.toISOString(),
+      };
+      const idx = store.collections.findIndex((c) => c.id === id);
+      if (idx !== -1) store.collections[idx] = col;
+      return col;
     } catch (err) {
-      console.error("Supabase exception (updateCollection):", err);
+      console.error("Prisma exception (updateCollection):", err);
     }
   }
 
-  const idx = store.collections.findIndex(c => c.id === id);
+  const idx = store.collections.findIndex((c) => c.id === id);
   if (idx !== -1) {
     store.collections[idx] = {
       ...store.collections[idx],
@@ -281,29 +236,22 @@ export async function updateCollection(id: string, name: string, description: st
 }
 
 export async function deleteCollection(id: string): Promise<boolean> {
-  if (supabase) {
+  if (isPrismaConfigured) {
     try {
-      const { error } = await supabase
-        .from("collections")
-        .delete()
-        .eq("id", id);
-
-      if (!error) {
-        const idx = store.collections.findIndex(c => c.id === id);
-        if (idx !== -1) store.collections.splice(idx, 1);
-        store.products = store.products.map(p => p.collectionId === id ? { ...p, collectionId: null } : p);
-        return true;
-      }
-      console.error("Supabase error (deleteCollection):", error);
+      await prisma.collection.delete({ where: { id } });
+      const idx = store.collections.findIndex((c) => c.id === id);
+      if (idx !== -1) store.collections.splice(idx, 1);
+      store.products = store.products.map((p) => (p.collectionId === id ? { ...p, collectionId: null } : p));
+      return true;
     } catch (err) {
-      console.error("Supabase exception (deleteCollection):", err);
+      console.error("Prisma exception (deleteCollection):", err);
     }
   }
 
-  const idx = store.collections.findIndex(c => c.id === id);
+  const idx = store.collections.findIndex((c) => c.id === id);
   if (idx !== -1) {
     store.collections.splice(idx, 1);
-    store.products = store.products.map(p => p.collectionId === id ? { ...p, collectionId: null } : p);
+    store.products = store.products.map((p) => (p.collectionId === id ? { ...p, collectionId: null } : p));
     return true;
   }
   return false;
@@ -314,31 +262,29 @@ export async function deleteCollection(id: string): Promise<boolean> {
 // ==========================================
 
 export async function getProducts(): Promise<Product[]> {
-  if (supabase) {
+  if (isPrismaConfigured) {
     try {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!error && data && data.length > 0) {
-        return data.map(item => ({
+      const data = await prisma.product.findMany({
+        orderBy: { createdAt: "desc" },
+      });
+      if (data && data.length > 0) {
+        return data.map((item) => ({
           id: item.id,
           name: item.name,
           slug: item.slug,
           description: item.description,
           price: Number(item.price),
           stock: Number(item.stock),
-          imageFront: item.image_front || item.image || "",
-          imageBack: item.image_back || item.image || "",
-          sizes: item.sizes || [],
-          categoryId: item.category_id,
-          collectionId: item.collection_id || null,
-          createdAt: item.created_at
+          imageFront: item.imageFront,
+          imageBack: item.imageBack,
+          sizes: item.sizes,
+          categoryId: item.categoryId,
+          collectionId: item.collectionId,
+          createdAt: item.createdAt.toISOString(),
         }));
       }
     } catch (err) {
-      console.error("Supabase exception (getProducts):", err);
+      console.error("Prisma exception (getProducts):", err);
     }
   }
 
@@ -346,15 +292,12 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
-  if (supabase) {
+  if (isPrismaConfigured) {
     try {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-      if (!error && data) {
+      const data = await prisma.product.findUnique({
+        where: { id },
+      });
+      if (data) {
         return {
           id: data.id,
           name: data.name,
@@ -362,20 +305,20 @@ export async function getProductById(id: string): Promise<Product | null> {
           description: data.description,
           price: Number(data.price),
           stock: Number(data.stock),
-          imageFront: data.image_front || data.image || "",
-          imageBack: data.image_back || data.image || "",
-          sizes: data.sizes || [],
-          categoryId: data.category_id,
-          collectionId: data.collection_id || null,
-          createdAt: data.created_at
+          imageFront: data.imageFront,
+          imageBack: data.imageBack,
+          sizes: data.sizes,
+          categoryId: data.categoryId,
+          collectionId: data.collectionId,
+          createdAt: data.createdAt.toISOString(),
         };
       }
     } catch (err) {
-      console.error("Supabase exception (getProductById):", err);
+      console.error("Prisma exception (getProductById):", err);
     }
   }
 
-  return store.products.find(p => p.id === id) || null;
+  return store.products.find((p) => p.id === id) || null;
 }
 
 export async function createProduct(productData: Omit<Product, "id" | "slug">): Promise<Product> {
@@ -385,49 +328,43 @@ export async function createProduct(productData: Omit<Product, "id" | "slug">): 
     ...productData,
     id,
     slug,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   };
 
-  if (supabase) {
+  if (isPrismaConfigured) {
     try {
-      const { data, error } = await supabase
-        .from("products")
-        .insert([{
+      const data = await prisma.product.create({
+        data: {
           name: productData.name,
           slug,
           description: productData.description,
           price: productData.price,
           stock: productData.stock,
-          image_front: productData.imageFront,
-          image_back: productData.imageBack,
+          imageFront: productData.imageFront,
+          imageBack: productData.imageBack,
           sizes: productData.sizes,
-          category_id: productData.categoryId,
-          collection_id: productData.collectionId || null
-        }])
-        .select()
-        .single();
-
-      if (!error && data) {
-        const prod: Product = {
-          id: data.id,
-          name: data.name,
-          slug: data.slug,
-          description: data.description,
-          price: Number(data.price),
-          stock: Number(data.stock),
-          imageFront: data.image_front,
-          imageBack: data.image_back,
-          sizes: data.sizes || [],
-          categoryId: data.category_id,
-          collectionId: data.collection_id || null,
-          createdAt: data.created_at
-        };
-        store.products.unshift(prod);
-        return prod;
-      }
-      console.error("Supabase error (createProduct):", error);
+          categoryId: productData.categoryId,
+          collectionId: productData.collectionId || null,
+        },
+      });
+      const prod: Product = {
+        id: data.id,
+        name: data.name,
+        slug: data.slug,
+        description: data.description,
+        price: Number(data.price),
+        stock: Number(data.stock),
+        imageFront: data.imageFront,
+        imageBack: data.imageBack,
+        sizes: data.sizes,
+        categoryId: data.categoryId,
+        collectionId: data.collectionId,
+        createdAt: data.createdAt.toISOString(),
+      };
+      store.products.unshift(prod);
+      return prod;
     } catch (err) {
-      console.error("Supabase exception (createProduct):", err);
+      console.error("Prisma exception (createProduct):", err);
     }
   }
 
@@ -440,66 +377,44 @@ export async function updateProduct(id: string, productData: Partial<Omit<Produc
     ? productData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "")
     : undefined;
 
-  if (supabase) {
+  if (isPrismaConfigured) {
     try {
-      const updatePayload: any = { ...productData };
-      if (slug) updatePayload.slug = slug;
-      
-      if (productData.categoryId) {
-        updatePayload.category_id = productData.categoryId;
-        delete updatePayload.categoryId;
-      }
-      if (productData.collectionId !== undefined) {
-        updatePayload.collection_id = productData.collectionId;
-        delete updatePayload.collectionId;
-      }
-      if (productData.imageFront !== undefined) {
-        updatePayload.image_front = productData.imageFront;
-        delete updatePayload.imageFront;
-      }
-      if (productData.imageBack !== undefined) {
-        updatePayload.image_back = productData.imageBack;
-        delete updatePayload.imageBack;
-      }
+      const updateData: any = { ...productData };
+      if (slug) updateData.slug = slug;
 
-      const { data, error } = await supabase
-        .from("products")
-        .update(updatePayload)
-        .eq("id", id)
-        .select()
-        .single();
+      const data = await prisma.product.update({
+        where: { id },
+        data: updateData,
+      });
 
-      if (!error && data) {
-        const prod: Product = {
-          id: data.id,
-          name: data.name,
-          slug: data.slug,
-          description: data.description,
-          price: Number(data.price),
-          stock: Number(data.stock),
-          imageFront: data.image_front,
-          imageBack: data.image_back,
-          sizes: data.sizes || [],
-          categoryId: data.category_id,
-          collectionId: data.collection_id || null,
-          createdAt: data.created_at
-        };
-        const idx = store.products.findIndex(p => p.id === id);
-        if (idx !== -1) store.products[idx] = prod;
-        return prod;
-      }
-      console.error("Supabase error (updateProduct):", error);
+      const prod: Product = {
+        id: data.id,
+        name: data.name,
+        slug: data.slug,
+        description: data.description,
+        price: Number(data.price),
+        stock: Number(data.stock),
+        imageFront: data.imageFront,
+        imageBack: data.imageBack,
+        sizes: data.sizes,
+        categoryId: data.categoryId,
+        collectionId: data.collectionId,
+        createdAt: data.createdAt.toISOString(),
+      };
+      const idx = store.products.findIndex((p) => p.id === id);
+      if (idx !== -1) store.products[idx] = prod;
+      return prod;
     } catch (err) {
-      console.error("Supabase exception (updateProduct):", err);
+      console.error("Prisma exception (updateProduct):", err);
     }
   }
 
-  const idx = store.products.findIndex(p => p.id === id);
+  const idx = store.products.findIndex((p) => p.id === id);
   if (idx !== -1) {
     store.products[idx] = {
       ...store.products[idx],
       ...productData,
-      ...(slug ? { slug } : {})
+      ...(slug ? { slug } : {}),
     };
     return store.products[idx];
   }
@@ -507,25 +422,18 @@ export async function updateProduct(id: string, productData: Partial<Omit<Produc
 }
 
 export async function deleteProduct(id: string): Promise<boolean> {
-  if (supabase) {
+  if (isPrismaConfigured) {
     try {
-      const { error } = await supabase
-        .from("products")
-        .delete()
-        .eq("id", id);
-
-      if (!error) {
-        const idx = store.products.findIndex(p => p.id === id);
-        if (idx !== -1) store.products.splice(idx, 1);
-        return true;
-      }
-      console.error("Supabase error (deleteProduct):", error);
+      await prisma.product.delete({ where: { id } });
+      const idx = store.products.findIndex((p) => p.id === id);
+      if (idx !== -1) store.products.splice(idx, 1);
+      return true;
     } catch (err) {
-      console.error("Supabase exception (deleteProduct):", err);
+      console.error("Prisma exception (deleteProduct):", err);
     }
   }
 
-  const idx = store.products.findIndex(p => p.id === id);
+  const idx = store.products.findIndex((p) => p.id === id);
   if (idx !== -1) {
     store.products.splice(idx, 1);
     return true;
@@ -538,23 +446,23 @@ export async function deleteProduct(id: string): Promise<boolean> {
 // ==========================================
 
 export async function getDashboardStats(): Promise<DashboardStats> {
-  if (supabase) {
+  if (isPrismaConfigured) {
     try {
-      const { count: catCount } = await supabase.from("categories").select("*", { count: "exact", head: true });
-      const { count: prodCount } = await supabase.from("products").select("*", { count: "exact", head: true });
-      const { count: colCount } = await supabase.from("collections").select("*", { count: "exact", head: true });
-      
-      const { data: sumData } = await supabase.from("products").select("stock");
-      const totalStock = sumData ? sumData.reduce((sum, item) => sum + (Number(item.stock) || 0), 0) : 0;
+      const [catCount, prodCount, colCount, stockAgg] = await Promise.all([
+        prisma.category.count(),
+        prisma.product.count(),
+        prisma.collection.count(),
+        prisma.product.aggregate({ _sum: { stock: true } }),
+      ]);
 
       return {
-        totalCategories: catCount || store.categories.length,
-        totalProducts: prodCount || store.products.length,
-        totalStock: totalStock || store.products.reduce((acc, p) => acc + p.stock, 0),
-        totalCollections: colCount || store.collections.length
+        totalCategories: catCount,
+        totalProducts: prodCount,
+        totalStock: stockAgg._sum.stock || 0,
+        totalCollections: colCount,
       };
     } catch (err) {
-      console.error("Supabase stats aggregation error, falling back to mock:", err);
+      console.error("Prisma stats error, falling back to mock:", err);
     }
   }
 
@@ -563,6 +471,6 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     totalCategories: store.categories.length,
     totalProducts: store.products.length,
     totalStock,
-    totalCollections: store.collections.length
+    totalCollections: store.collections.length,
   };
 }

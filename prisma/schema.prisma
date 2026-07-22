@@ -1,0 +1,52 @@
+// Prisma Schema File for CORECULTURE Fashion Catalog
+// Supports PostgreSQL (Local pgAdmin4 / Supabase Online)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  slug      String    @unique
+  createdAt DateTime  @default(now()) @map("created_at")
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Collection {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?   @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at")
+  products    Product[]
+
+  @@map("collections")
+}
+
+model Product {
+  id           String      @id @default(uuid())
+  name         String
+  slug         String      @unique
+  description  String      @db.Text
+  price        Decimal     @db.Decimal(12, 2)
+  stock        Int         @default(0)
+  imageFront   String      @map("image_front") @db.Text
+  imageBack    String      @map("image_back") @db.Text
+  sizes        String[]    @default([])
+  categoryId   String      @map("category_id")
+  collectionId String?     @map("collection_id")
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  category     Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  collection   Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+
+  @@map("products")
+}

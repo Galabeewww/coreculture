@@ -71,7 +71,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
       {/* Header Koleksi */}
       {collection && (
         <header className="w-full py-16 bg-primary text-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 rounded-lg bg-white/10">
                 <Bookmark className="h-5 w-5 text-white/80" />
@@ -91,7 +91,7 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
         </header>
       )}
 
-      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 w-full flex-grow">
+      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 w-full flex-grow animate-fade-in-up">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-8">
           <Link href="/" className="hover:text-primary transition-colors">Home</Link>

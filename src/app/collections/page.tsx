@@ -53,7 +53,7 @@ export default function CollectionsPage() {
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMC41Ii8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] bg-repeat" />
         </div>
-        <div className="relative z-10 text-center space-y-4 px-4">
+        <div className="relative z-10 text-center space-y-4 px-4 animate-fade-in-up">
           <Bookmark className="h-10 w-10 text-white/60 mx-auto" />
           <h1 className="text-4xl md:text-5xl font-black tracking-wider text-white uppercase">
             OUR COLLECTIONS
@@ -84,7 +84,7 @@ export default function CollectionsPage() {
                 <Link
                   key={col.id}
                   href={`/collection/${col.slug}`}
-                  className="group block bg-white border border-zinc-200 rounded-xl p-8 hover:border-primary hover:shadow-lg transition-all duration-300"
+                  className="group block bg-white border border-zinc-200 rounded-xl p-8 hover:border-primary hover:shadow-lg transition-all duration-300 hover-lift animate-fade-in-up"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/20">
