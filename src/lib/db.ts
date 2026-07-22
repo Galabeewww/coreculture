@@ -38,7 +38,6 @@ const store = globalForDb.dbStore;
 
 export async function getCategories(): Promise<Category[]> {
   if (supabase) {
-    // Jalankan query ke tabel Supabase jika sudah terhubung
     const { data, error } = await supabase
       .from("categories")
       .select("*")
@@ -55,7 +54,6 @@ export async function getCategories(): Promise<Category[]> {
     console.error("Supabase error (getCategories):", error);
   }
   
-  // Fallback ke In-Memory Store
   return store.categories;
 }
 
@@ -86,7 +84,6 @@ export async function createCategory(name: string): Promise<Category> {
     console.error("Supabase error (createCategory):", error);
   }
 
-  // Fallback ke In-Memory Store
   store.categories.push(newCategory);
   return newCategory;
 }
@@ -113,7 +110,6 @@ export async function updateCategory(id: string, name: string): Promise<Category
     console.error("Supabase error (updateCategory):", error);
   }
 
-  // Fallback ke In-Memory Store
   const idx = store.categories.findIndex(c => c.id === id);
   if (idx !== -1) {
     store.categories[idx] = {
@@ -137,11 +133,9 @@ export async function deleteCategory(id: string): Promise<boolean> {
     console.error("Supabase error (deleteCategory):", error);
   }
 
-  // Fallback ke In-Memory Store
   const idx = store.categories.findIndex(c => c.id === id);
   if (idx !== -1) {
     store.categories.splice(idx, 1);
-    // Hapus juga produk-produk yang terasosiasi dengan kategori ini (Cascade behavior)
     store.products = store.products.filter(p => p.categoryId !== id);
     return true;
   }
@@ -167,7 +161,8 @@ export async function getProducts(): Promise<Product[]> {
         description: item.description,
         price: Number(item.price),
         stock: Number(item.stock),
-        image: item.image,
+        imageFront: item.image_front || item.image || "", // fallback ke field lama jika ada
+        imageBack: item.image_back || item.image || "",  // fallback ke field lama jika ada
         sizes: item.sizes || [],
         categoryId: item.category_id,
         createdAt: item.created_at
@@ -176,7 +171,6 @@ export async function getProducts(): Promise<Product[]> {
     console.error("Supabase error (getProducts):", error);
   }
 
-  // Fallback ke In-Memory Store
   return store.products;
 }
 
@@ -196,7 +190,8 @@ export async function getProductById(id: string): Promise<Product | null> {
         description: data.description,
         price: Number(data.price),
         stock: Number(data.stock),
-        image: data.image,
+        imageFront: data.image_front || data.image || "",
+        imageBack: data.image_back || data.image || "",
         sizes: data.sizes || [],
         categoryId: data.category_id,
         createdAt: data.created_at
@@ -205,7 +200,6 @@ export async function getProductById(id: string): Promise<Product | null> {
     console.error("Supabase error (getProductById):", error);
   }
 
-  // Fallback ke In-Memory Store
   return store.products.find(p => p.id === id) || null;
 }
 
@@ -228,7 +222,8 @@ export async function createProduct(productData: Omit<Product, "id" | "slug">): 
         description: productData.description,
         price: productData.price,
         stock: productData.stock,
-        image: productData.image,
+        image_front: productData.imageFront,
+        image_back: productData.imageBack,
         sizes: productData.sizes,
         category_id: productData.categoryId
       }])
@@ -243,7 +238,8 @@ export async function createProduct(productData: Omit<Product, "id" | "slug">): 
         description: data.description,
         price: Number(data.price),
         stock: Number(data.stock),
-        image: data.image,
+        imageFront: data.image_front,
+        imageBack: data.image_back,
         sizes: data.sizes || [],
         categoryId: data.category_id,
         createdAt: data.created_at
@@ -252,8 +248,7 @@ export async function createProduct(productData: Omit<Product, "id" | "slug">): 
     console.error("Supabase error (createProduct):", error);
   }
 
-  // Fallback ke In-Memory Store
-  store.products.unshift(newProduct); // Tambahkan ke awal array
+  store.products.unshift(newProduct);
   return newProduct;
 }
 
@@ -265,9 +260,19 @@ export async function updateProduct(id: string, productData: Partial<Omit<Produc
   if (supabase) {
     const updatePayload: any = { ...productData };
     if (slug) updatePayload.slug = slug;
+    
+    // Konversi field camelCase ke snake_case untuk Supabase PostgreSQL
     if (productData.categoryId) {
       updatePayload.category_id = productData.categoryId;
       delete updatePayload.categoryId;
+    }
+    if (productData.imageFront !== undefined) {
+      updatePayload.image_front = productData.imageFront;
+      delete updatePayload.imageFront;
+    }
+    if (productData.imageBack !== undefined) {
+      updatePayload.image_back = productData.imageBack;
+      delete updatePayload.imageBack;
     }
 
     const { data, error } = await supabase
@@ -285,7 +290,8 @@ export async function updateProduct(id: string, productData: Partial<Omit<Produc
         description: data.description,
         price: Number(data.price),
         stock: Number(data.stock),
-        image: data.image,
+        imageFront: data.image_front,
+        imageBack: data.image_back,
         sizes: data.sizes || [],
         categoryId: data.category_id,
         createdAt: data.created_at
@@ -294,7 +300,6 @@ export async function updateProduct(id: string, productData: Partial<Omit<Produc
     console.error("Supabase error (updateProduct):", error);
   }
 
-  // Fallback ke In-Memory Store
   const idx = store.products.findIndex(p => p.id === id);
   if (idx !== -1) {
     store.products[idx] = {
@@ -318,7 +323,6 @@ export async function deleteProduct(id: string): Promise<boolean> {
     console.error("Supabase error (deleteProduct):", error);
   }
 
-  // Fallback ke In-Memory Store
   const idx = store.products.findIndex(p => p.id === id);
   if (idx !== -1) {
     store.products.splice(idx, 1);
@@ -350,7 +354,6 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     }
   }
 
-  // Fallback ke In-Memory Store
   const totalStock = store.products.reduce((acc, p) => acc + p.stock, 0);
   return {
     totalCategories: store.categories.length,

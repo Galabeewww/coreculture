@@ -32,12 +32,12 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, description, price, stock, image, sizes, categoryId } = body;
+    const { name, description, price, stock, imageFront, imageBack, sizes, categoryId } = body;
 
     // Validasi data input
-    if (!name || !price || !categoryId || stock === undefined || !image) {
+    if (!name || !price || !categoryId || stock === undefined || !imageFront || !imageBack) {
       return NextResponse.json(
-        { error: "Atribut wajib produk tidak lengkap (nama, harga, kategori, stok, gambar)" },
+        { error: "Atribut wajib produk tidak lengkap (nama, harga, kategori, stok, gambar depan & belakang)" },
         { status: 400 }
       );
     }
@@ -47,7 +47,8 @@ export async function POST(request: Request) {
       description: (description || "").trim(),
       price: Number(price),
       stock: Number(stock),
-      image: image.trim(),
+      imageFront: imageFront.trim(),
+      imageBack: imageBack.trim(),
       sizes: Array.isArray(sizes) ? sizes : ["All Size"],
       categoryId
     });

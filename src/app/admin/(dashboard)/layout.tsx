@@ -9,8 +9,7 @@ import { LayoutDashboard, FolderKanban, ShoppingBag, LogOut, ArrowLeft, Menu, X 
  * Layout: Panel Admin Dashboard (Terproteksi)
  * Path: /admin/(dashboard)/*
  * 
- * Menggunakan Route Group (dashboard) agar file login (/admin/login) tidak
- * terpengaruh oleh layout bersidebar dan logic proteksi redirect loop.
+ * Diperbarui ke tema warna baru: Canvas Putih dengan aksen #002D72 (Deep Blue).
  */
 export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -53,10 +52,10 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black">
+      <div className="flex min-h-screen items-center justify-center bg-white text-zinc-900">
         <div className="text-center space-y-4">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-accent border-r-transparent" />
-          <p className="text-gray-500 text-xs tracking-widest uppercase">Memverifikasi Otoritas Sesi...</p>
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent" />
+          <p className="text-zinc-500 text-xs tracking-widest uppercase">Memverifikasi Otoritas Sesi...</p>
         </div>
       </div>
     );
@@ -67,10 +66,10 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
   // Helper kelas navigasi aktif
   const linkClass = (path: string) => {
     const isActive = pathname === path;
-    return `flex items-center gap-3 px-4 py-3 rounded text-xs font-bold tracking-wider uppercase transition-all duration-200 ${
+    return `flex items-center gap-3 px-4 py-3 rounded text-xs font-black tracking-wider uppercase transition-all duration-200 ${
       isActive
-        ? "bg-accent text-black font-black glow-accent"
-        : "text-gray-400 hover:text-white hover:bg-zinc-900"
+        ? "bg-primary text-white glow-accent shadow-sm"
+        : "text-zinc-600 hover:text-primary hover:bg-zinc-100"
     }`;
   };
 
@@ -81,19 +80,19 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
   ];
 
   return (
-    <div className="min-h-screen bg-black flex flex-col md:flex-row text-gray-300">
+    <div className="min-h-screen bg-white flex flex-col md:flex-row text-zinc-800">
       
       {/* 1. SIDEBAR DESKTOP */}
-      <aside className="hidden md:flex flex-col w-64 bg-zinc-950 border-r border-zinc-900 p-6 justify-between shrink-0">
+      <aside className="hidden md:flex flex-col w-64 bg-zinc-50 border-r border-zinc-200 p-6 justify-between shrink-0">
         <div className="space-y-8">
           {/* Brand & Console Tag */}
           <div>
-            <h1 className="text-lg font-black tracking-widest text-white uppercase">CORECULTURE</h1>
-            <span className="text-[9px] text-accent font-bold tracking-wider uppercase">Console Admin</span>
+            <h1 className="text-lg font-black tracking-widest text-zinc-900 uppercase">CORECULTURE</h1>
+            <span className="text-[9px] text-primary font-black tracking-wider uppercase">Console Admin</span>
           </div>
 
           {/* Menu Link */}
-          <nav className="flex flex-col gap-2">
+          <nav className="flex flex-col gap-1.5">
             {navItems.map((item) => (
               <Link key={item.path} href={item.path} className={linkClass(item.path)}>
                 {item.icon}
@@ -104,17 +103,17 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
         </div>
 
         {/* Tombol Logout & Kembali */}
-        <div className="space-y-4 pt-6 border-t border-zinc-900">
+        <div className="space-y-4 pt-6 border-t border-zinc-200">
           <Link
             href="/"
-            className="flex items-center gap-3 px-4 py-3 rounded text-xs font-bold tracking-wider text-gray-500 hover:text-white transition-colors uppercase"
+            className="flex items-center gap-3 px-4 py-3 rounded text-xs font-bold tracking-wider text-zinc-500 hover:text-primary transition-colors uppercase"
           >
             <ArrowLeft className="h-4.5 w-4.5" />
             Ke Toko Publik
           </Link>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded text-xs font-bold tracking-wider text-red-500 hover:text-red-400 hover:bg-red-500/10 cursor-pointer transition-all uppercase"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded text-xs font-bold tracking-wider text-red-600 hover:text-red-500 hover:bg-red-50 cursor-pointer transition-all uppercase"
           >
             <LogOut className="h-4.5 w-4.5" />
             LOGOUT
@@ -123,14 +122,14 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
       </aside>
 
       {/* 2. HEADER MOBILE */}
-      <header className="md:hidden flex items-center justify-between bg-zinc-950 border-b border-zinc-900 p-4 shrink-0">
+      <header className="md:hidden flex items-center justify-between bg-zinc-50 border-b border-zinc-200 p-4 shrink-0">
         <div>
-          <h1 className="text-sm font-black tracking-widest text-white uppercase">CORECULTURE</h1>
-          <span className="text-[8px] text-accent font-bold tracking-wider uppercase">Console Admin</span>
+          <h1 className="text-sm font-black tracking-widest text-zinc-900 uppercase">CORECULTURE</h1>
+          <span className="text-[8px] text-primary font-black tracking-wider uppercase">Console Admin</span>
         </div>
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-2 text-gray-400 hover:text-white focus:outline-none"
+          className="p-2 text-zinc-500 hover:text-primary focus:outline-none"
         >
           {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
@@ -138,7 +137,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
 
       {/* Menu Navigasi Mobile */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-zinc-950 border-b border-zinc-900 px-4 py-4 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="md:hidden bg-zinc-50 border-b border-zinc-200 px-4 py-4 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
           {navItems.map((item) => (
             <Link
               key={item.path}
@@ -150,17 +149,17 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
               {item.label}
             </Link>
           ))}
-          <div className="border-t border-zinc-900 pt-4 mt-2 flex flex-col gap-2">
+          <div className="border-t border-zinc-200 pt-4 mt-2 flex flex-col gap-2">
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-2 text-xs font-bold text-gray-500 hover:text-white uppercase"
+              className="flex items-center gap-3 px-4 py-2 text-xs font-bold text-zinc-500 hover:text-primary uppercase"
             >
               <ArrowLeft className="h-4 w-4" /> Ke Toko Publik
             </Link>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-3 px-4 py-2 text-xs font-bold text-red-500 hover:text-red-400 uppercase cursor-pointer"
+              className="flex items-center gap-3 px-4 py-2 text-xs font-bold text-red-600 hover:text-red-500 uppercase cursor-pointer"
             >
               <LogOut className="h-4 w-4" /> LOGOUT
             </button>
@@ -169,7 +168,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
       )}
 
       {/* 3. AREA KONTEN UTAMA */}
-      <main className="flex-grow p-6 md:p-10 overflow-y-auto max-h-[calc(100vh-60px)] md:max-h-screen">
+      <main className="flex-grow p-6 md:p-10 overflow-y-auto max-h-[calc(100vh-60px)] md:max-h-screen bg-white">
         {children}
       </main>
 

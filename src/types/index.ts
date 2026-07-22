@@ -12,8 +12,9 @@ export interface Product {
   description: string;
   price: number;
   stock: number;
-  image: string; // URL gambar produk
-  sizes: string[]; // Contoh: ['S', 'M', 'L', 'XL']
+  imageFront: string; // Gambar bagian depan (Base64 atau URL)
+  imageBack: string;  // Gambar bagian belakang (Base64 atau URL)
+  sizes: string[];    // Contoh: ['S', 'M', 'L', 'XL']
   categoryId: string;
   createdAt?: string;
 }

@@ -2,12 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { Product, Category } from "@/types";
-import { Plus, Edit2, Trash2, X, ImageIcon } from "lucide-react";
+import { Plus, Edit2, Trash2, X, Upload, Check, ImageIcon } from "lucide-react";
 import { formatIDR } from "@/components/ProductCard";
 
 /**
  * Halaman CRUD Produk Admin
  * Path: /admin/products
+ * 
+ * Diperbarui:
+ * - Tema warna baru: Canvas Putih dengan aksen #002D72 (Deep Blue).
+ * - Fitur Unggah Foto (File Upload): mengganti teks input URL dengan input file foto asli.
+ * - Mendukung unggah 2 gambar sekaligus (Gambar Depan & Gambar Belakang) yang diubah ke format Base64 secara instan.
+ * - Memiliki preview gambar dinamis dalam form modal.
  */
 export default function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -16,29 +22,75 @@ export default function AdminProducts() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // State untuk form overlay modal
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
+  // Form Fields
   const [name, setName] = useState("");
   const [price, setPrice] = useState(0);
   const [stock, setStock] = useState(0);
   const [description, setDescription] = useState("");
-  const [image, setImage] = useState("");
+  const [imageFront, setImageFront] = useState("");
+  const [imageBack, setImageBack] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
 
+  // State loading saat proses encode file
+  const [uploadingFront, setUploadingFront] = useState(false);
+  const [uploadingBack, setUploadingBack] = useState(false);
+
   const SIZE_OPTIONS = ["S", "M", "L", "XL", "28", "30", "32", "34", "All Size"];
 
+  // Preset Gambar opsional (Unsplash) untuk pengisian cepat saat demo/testing
   const PRESET_IMAGES = [
-    { label: "Black Street Tee", url: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=600" },
-    { label: "White Classic Tee", url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=600" },
-    { label: "Techwear Cargo", url: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=600" },
-    { label: "Baggy Jeans", url: "https://images.unsplash.com/photo-1517423568366-8b83523034fd?q=80&w=600" },
-    { label: "Varsity Jacket", url: "https://images.unsplash.com/photo-1611312449412-6cefac5dc3e4?q=80&w=600" },
-    { label: "Cotton Hoodie", url: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=600" },
-    { label: "Leather Bag", url: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=600" },
-    { label: "Snapback Cap", url: "https://images.unsplash.com/photo-1534215754734-18e55d13e346?q=80&w=600" },
+    { label: "Black Tee", url: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=600" },
+    { label: "White Tee", url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=600" },
+    { label: "Cargo Pants", url: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=600" },
+    { label: "Denim Pants", url: "https://images.unsplash.com/photo-1517423568366-8b83523034fd?q=80&w=600" }
   ];
+
+  // Konversi berkas unggahan ke Base64
+  const processFile = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        resolve(reader.result as string);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFrontUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingFront(true);
+    try {
+      const base64 = await processFile(file);
+      setImageFront(base64);
+    } catch (err) {
+      console.error(err);
+      alert("Gagal membaca file gambar.");
+    } finally {
+      setUploadingFront(false);
+    }
+  };
+
+  const handleBackUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingBack(true);
+    try {
+      const base64 = await processFile(file);
+      setImageBack(base64);
+    } catch (err) {
+      console.error(err);
+      alert("Gagal membaca file gambar.");
+    } finally {
+      setUploadingBack(false);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -80,7 +132,8 @@ export default function AdminProducts() {
     setPrice(199000);
     setStock(20);
     setDescription("");
-    setImage(PRESET_IMAGES[0].url);
+    setImageFront(PRESET_IMAGES[0].url);
+    setImageBack(PRESET_IMAGES[0].url); // prefill default yang sama
     if (categories.length > 0) setCategoryId(categories[0].id);
     setSelectedSizes(["M", "L", "XL"]);
     setIsFormOpen(true);
@@ -92,7 +145,8 @@ export default function AdminProducts() {
     setPrice(prod.price);
     setStock(prod.stock);
     setDescription(prod.description);
-    setImage(prod.image);
+    setImageFront(prod.imageFront);
+    setImageBack(prod.imageBack || prod.imageFront);
     setCategoryId(prod.categoryId);
     setSelectedSizes(prod.sizes);
     setIsFormOpen(true);
@@ -109,8 +163,8 @@ export default function AdminProducts() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name.trim() || !image.trim() || !categoryId) {
-      alert("Silakan lengkapi formulir produk wajib!");
+    if (!name.trim() || !imageFront.trim() || !categoryId) {
+      alert("Silakan lengkapi formulir produk wajib (nama, kategori, gambar depan)!");
       return;
     }
 
@@ -119,7 +173,8 @@ export default function AdminProducts() {
       description: description.trim(),
       price: Number(price),
       stock: Number(stock),
-      image: image.trim(),
+      imageFront: imageFront.trim(),
+      imageBack: imageBack.trim() || imageFront.trim(), // fallback belakang sama dengan depan jika kosong
       sizes: selectedSizes.length > 0 ? selectedSizes : ["All Size"],
       categoryId
     };
@@ -183,48 +238,51 @@ export default function AdminProducts() {
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-black text-white tracking-wider uppercase">MANAGE PRODUCTS</h2>
-          <p className="text-xs text-gray-500 mt-1 uppercase">Pengelolaan katalog pakaian dan aksesoris</p>
+          <h2 className="text-2xl font-black text-zinc-900 tracking-wider uppercase">MANAGE PRODUCTS</h2>
+          <p className="text-xs text-zinc-500 mt-1 uppercase">Pengelolaan katalog pakaian dan aksesoris</p>
         </div>
         <button
           onClick={openAddForm}
-          className="flex items-center gap-2 bg-accent text-black font-black text-xs px-4 py-3 rounded cursor-pointer glow-accent hover:scale-[1.02] transition-transform uppercase"
+          className="flex items-center gap-2 bg-primary text-white font-black text-xs px-4 py-3 rounded cursor-pointer shadow-md hover:bg-primary-hover transition-colors uppercase"
         >
           <Plus className="h-4 w-4" /> TAMBAH PRODUK BARU
         </button>
       </div>
 
+      {/* Status */}
       {success && (
-        <div className="rounded border border-green-500/20 bg-green-500/10 p-3 text-xs font-semibold text-green-400">
+        <div className="rounded border border-green-500/20 bg-green-500/10 p-3 text-xs font-semibold text-green-600">
           {success}
         </div>
       )}
       {error && (
-        <div className="rounded border border-red-500/20 bg-red-500/10 p-3 text-xs font-semibold text-red-400">
+        <div className="rounded border border-red-500/20 bg-red-500/10 p-3 text-xs font-semibold text-red-600">
           {error}
         </div>
       )}
 
-      <div className="bg-zinc-950 border border-zinc-900 rounded-lg overflow-hidden">
-        <div className="px-6 py-5 border-b border-zinc-900">
-          <h3 className="text-xs font-black text-white tracking-widest uppercase">DAFTAR KATALOG</h3>
+      {/* Tabel */}
+      <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden shadow-sm">
+        <div className="px-6 py-5 border-b border-zinc-200 bg-zinc-50/50">
+          <h3 className="text-xs font-black text-zinc-800 tracking-widest uppercase">DAFTAR KATALOG</h3>
         </div>
 
         {loading ? (
-          <div className="py-20 text-center text-xs text-gray-500 uppercase tracking-widest animate-pulse">
+          <div className="py-20 text-center text-xs text-zinc-500 uppercase tracking-widest animate-pulse">
             Memuat Data Katalog...
           </div>
         ) : products.length === 0 ? (
-          <div className="py-20 text-center text-xs text-gray-500 uppercase tracking-widest">
+          <div className="py-20 text-center text-xs text-zinc-500 uppercase tracking-widest">
             Belum ada produk terdaftar. Klik "+ Tambah Produk Baru" untuk memulai.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-zinc-900 text-gray-500 font-black uppercase tracking-wider bg-zinc-900/10">
+                <tr className="border-b border-zinc-200 text-zinc-500 font-black uppercase tracking-wider bg-zinc-50">
                   <th className="px-6 py-4">Gambar & Nama</th>
                   <th className="px-6 py-4">Kategori</th>
                   <th className="px-6 py-4">Harga</th>
@@ -233,23 +291,23 @@ export default function AdminProducts() {
                   <th className="px-6 py-4 text-right">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-900">
+              <tbody className="divide-y divide-zinc-200">
                 {products.map((prod) => {
                   const catName = categories.find((c) => c.id === prod.categoryId)?.name || "Lainnya";
                   return (
-                    <tr key={prod.id} className="hover:bg-zinc-900/20 transition-colors">
+                    <tr key={prod.id} className="hover:bg-zinc-50 transition-colors">
                       <td className="px-6 py-4 flex items-center gap-3">
-                        <div className="h-12 w-9 rounded overflow-hidden bg-zinc-900 shrink-0 border border-zinc-800">
-                          <img src={prod.image} alt={prod.name} className="h-full w-full object-cover" />
+                        <div className="h-12 w-9 rounded overflow-hidden bg-zinc-100 shrink-0 border border-zinc-200">
+                          <img src={prod.imageFront} alt={prod.name} className="h-full w-full object-cover" />
                         </div>
-                        <span className="font-bold text-white text-sm">{prod.name}</span>
+                        <span className="font-bold text-zinc-900 text-sm">{prod.name}</span>
                       </td>
 
-                      <td className="px-6 py-4 text-gray-400 font-semibold uppercase text-[10px] tracking-wide">
+                      <td className="px-6 py-4 text-zinc-500 font-bold uppercase text-[10px] tracking-wide">
                         {catName}
                       </td>
 
-                      <td className="px-6 py-4 text-gray-400 font-bold">
+                      <td className="px-6 py-4 text-zinc-700 font-bold">
                         {formatIDR(prod.price)}
                       </td>
 
@@ -257,14 +315,14 @@ export default function AdminProducts() {
                         {prod.stock === 0 ? (
                           <span className="text-red-500 font-black uppercase tracking-wider text-[10px]">SOLD OUT</span>
                         ) : (
-                          <span className="text-gray-300 font-bold">{prod.stock} Pcs</span>
+                          <span className="text-zinc-700 font-bold">{prod.stock} Pcs</span>
                         )}
                       </td>
 
                       <td className="px-6 py-4">
                         <div className="flex flex-wrap gap-1 max-w-[150px]">
                           {prod.sizes.map((s) => (
-                            <span key={s} className="bg-zinc-900 border border-zinc-800 text-[9px] px-1.5 py-0.5 rounded text-gray-400 font-black">
+                            <span key={s} className="bg-zinc-100 border border-zinc-200 text-[9px] px-1.5 py-0.5 rounded text-zinc-500 font-black">
                               {s}
                             </span>
                           ))}
@@ -275,14 +333,14 @@ export default function AdminProducts() {
                         <div className="flex justify-end gap-2">
                           <button
                             onClick={() => openEditForm(prod)}
-                            className="p-1.5 rounded bg-zinc-900 border border-zinc-800 text-gray-400 hover:text-white hover:border-zinc-600 cursor-pointer transition-colors"
+                            className="p-1.5 rounded bg-zinc-50 border border-zinc-200 text-zinc-500 hover:text-primary hover:border-primary cursor-pointer transition-colors"
                             title="Edit Produk"
                           >
                             <Edit2 className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteProduct(prod.id, prod.name)}
-                            className="p-1.5 rounded bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 cursor-pointer transition-colors"
+                            className="p-1.5 rounded bg-red-500/10 border border-red-500/20 text-red-600 hover:bg-red-500/20 cursor-pointer transition-colors"
                             title="Hapus Produk"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -298,17 +356,20 @@ export default function AdminProducts() {
         )}
       </div>
 
+      {/* ==============================================
+          MODAL OVERLAY: FORM TAMBAH / EDIT PRODUK
+          ============================================== */}
       {isFormOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col text-zinc-800">
             
-            <div className="px-6 py-4 border-b border-zinc-900 flex justify-between items-center bg-zinc-900/10">
-              <h3 className="text-xs font-black text-white tracking-widest uppercase">
+            <div className="px-6 py-4 border-b border-zinc-200 flex justify-between items-center bg-zinc-50">
+              <h3 className="text-xs font-black text-zinc-800 tracking-widest uppercase">
                 {editingProduct ? "EDIT PRODUK KATALOG" : "TAMBAH PRODUK BARU"}
               </h3>
               <button
                 onClick={() => setIsFormOpen(false)}
-                className="p-1.5 rounded-full hover:bg-zinc-900 text-gray-400 hover:text-white transition-colors cursor-pointer"
+                className="p-1.5 rounded-full hover:bg-zinc-100 text-zinc-500 hover:text-zinc-800 transition-colors cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -318,27 +379,27 @@ export default function AdminProducts() {
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase">Nama Produk *</label>
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase">Nama Produk *</label>
                   <input
                     type="text"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Contoh: Graphic Tees V2"
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-accent"
+                    placeholder="Contoh: Varsity Jacket Legacy"
+                    className="w-full bg-white border border-zinc-200 rounded px-3 py-2.5 text-xs text-zinc-800 focus:outline-none focus:border-primary"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase">Kategori *</label>
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase">Kategori *</label>
                   <select
                     value={categoryId}
                     onChange={(e) => setCategoryId(e.target.value)}
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2.5 text-xs text-white focus:outline-none focus:border-accent"
+                    className="w-full bg-white border border-zinc-200 rounded px-3 py-2.5 text-xs text-zinc-800 focus:outline-none focus:border-primary"
                     required
                   >
                     {categories.length === 0 ? (
-                      <option disabled>Silakan buat kategori dahulu</option>
+                      <option disabled>Buat kategori terlebih dahulu</option>
                     ) : (
                       categories.map((cat) => (
                         <option key={cat.id} value={cat.id}>{cat.name}</option>
@@ -348,68 +409,122 @@ export default function AdminProducts() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase">Harga Produk (Rupiah) *</label>
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase">Harga Produk (Rupiah) *</label>
                   <input
                     type="number"
                     min="1000"
                     required
                     value={price}
                     onChange={(e) => setPrice(Number(e.target.value))}
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2.5 text-xs text-white focus:outline-none focus:border-accent"
+                    className="w-full bg-white border border-zinc-200 rounded px-3 py-2.5 text-xs text-zinc-800 focus:outline-none focus:border-primary"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase">Jumlah Stok *</label>
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase">Jumlah Stok *</label>
                   <input
                     type="number"
                     min="0"
                     required
                     value={stock}
                     onChange={(e) => setStock(Number(e.target.value))}
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2.5 text-xs text-white focus:outline-none focus:border-accent"
+                    className="w-full bg-white border border-zinc-200 rounded px-3 py-2.5 text-xs text-zinc-800 focus:outline-none focus:border-primary"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-500 uppercase">Deskripsi Produk</label>
+                <label className="text-[10px] font-bold text-zinc-500 uppercase">Deskripsi Produk</label>
                 <textarea
                   rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Detail bahan, kelebihan produk, fitting size..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-accent resize-none"
+                  className="w-full bg-white border border-zinc-200 rounded px-3 py-2.5 text-xs text-zinc-800 focus:outline-none focus:border-primary resize-none"
                 />
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center gap-1.5">
-                  <ImageIcon className="h-3.5 w-3.5 text-zinc-500" />
-                  <label className="text-[10px] font-bold text-gray-500 uppercase">URL Gambar Produk *</label>
-                </div>
-                <input
-                  type="text"
-                  required
-                  value={image}
-                  onChange={(e) => setImage(e.target.value)}
-                  placeholder="Ketikkan URL gambar disini..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded px-3 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-accent"
-                />
+              {/* SECTION: INPUT GAMBAR DENGAN UPLOAD FILE */}
+              <div className="space-y-4 border-t border-zinc-100 pt-4">
+                <h4 className="text-xs font-black text-zinc-800 uppercase tracking-wider">GAMBAR PRODUK (UNGGAH FOTO)</h4>
                 
-                <div className="space-y-1.5 pt-1">
-                  <span className="text-[9px] font-bold text-zinc-600 uppercase">REKOMENDASI GAMBAR STREETWEAR (KLIK UNTUK MEMILIH):</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {/* Unggah Gambar Depan */}
+                  <div className="space-y-2.5">
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase">1. Foto Bagian Depan *</label>
+                    <div className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-200 rounded-lg p-4 bg-zinc-50 relative aspect-[4/5] overflow-hidden group">
+                      {imageFront ? (
+                        <>
+                          <img src={imageFront} alt="Preview Depan" className="w-full h-full object-cover absolute inset-0 z-0" />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
+                            <span className="text-white text-[10px] font-bold uppercase tracking-wider bg-red-600 px-2 py-1 rounded cursor-pointer" onClick={(e) => { e.preventDefault(); setImageFront(""); }}>
+                              GANTI
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-center space-y-2 z-10">
+                          <Upload className="h-6 w-6 text-zinc-400 mx-auto" />
+                          <span className="text-[10px] text-zinc-500 font-medium block">Pilih berkas foto depan</span>
+                          <span className="text-[9px] text-zinc-400 block">(Max 5MB, format JPG/PNG)</span>
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFrontUpload}
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                        title="Unggah Foto Depan"
+                      />
+                    </div>
+                    {uploadingFront && <p className="text-[10px] text-primary font-bold animate-pulse text-center">Memproses file...</p>}
+                  </div>
+
+                  {/* Unggah Gambar Belakang */}
+                  <div className="space-y-2.5">
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase">2. Foto Bagian Belakang</label>
+                    <div className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-200 rounded-lg p-4 bg-zinc-50 relative aspect-[4/5] overflow-hidden group">
+                      {imageBack ? (
+                        <>
+                          <img src={imageBack} alt="Preview Belakang" className="w-full h-full object-cover absolute inset-0 z-0" />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
+                            <span className="text-white text-[10px] font-bold uppercase tracking-wider bg-red-600 px-2 py-1 rounded cursor-pointer" onClick={(e) => { e.preventDefault(); setImageBack(""); }}>
+                              GANTI
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-center space-y-2 z-10">
+                          <Upload className="h-6 w-6 text-zinc-400 mx-auto" />
+                          <span className="text-[10px] text-zinc-500 font-medium block">Pilih berkas foto belakang</span>
+                          <span className="text-[9px] text-zinc-400 block">(Max 5MB, format JPG/PNG)</span>
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleBackUpload}
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                        title="Unggah Foto Belakang"
+                      />
+                    </div>
+                    {uploadingBack && <p className="text-[10px] text-primary font-bold animate-pulse text-center">Memproses file...</p>}
+                  </div>
+                </div>
+
+                {/* Preset Gambar Cepat untuk Demo */}
+                <div className="space-y-1.5 bg-zinc-50 p-3 rounded border border-zinc-100">
+                  <div className="flex items-center gap-1">
+                    <ImageIcon className="h-3.5 w-3.5 text-zinc-500" />
+                    <span className="text-[9px] font-bold text-zinc-500 uppercase">Demo Preset (Klik untuk Isi Cepat):</span>
+                  </div>
                   <div className="flex flex-wrap gap-1">
                     {PRESET_IMAGES.map((img) => (
                       <button
                         key={img.label}
                         type="button"
-                        onClick={() => setImage(img.url)}
-                        className={`text-[9px] px-2 py-1 rounded border font-semibold transition-all cursor-pointer ${
-                          image === img.url
-                            ? "bg-accent border-accent text-black"
-                            : "bg-zinc-900 border-zinc-800 text-gray-400 hover:text-white"
-                        }`}
+                        onClick={() => { setImageFront(img.url); setImageBack(img.url); }}
+                        className="text-[9px] px-2 py-1 bg-white border border-zinc-200 rounded font-semibold text-zinc-600 hover:border-primary transition-colors cursor-pointer"
                       >
                         {img.label}
                       </button>
@@ -418,16 +533,17 @@ export default function AdminProducts() {
                 </div>
               </div>
 
+              {/* Varian Ukuran */}
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-gray-500 uppercase">Pilih Varian Ukuran (Pilih Minimal Satu) *</label>
-                <div className="flex flex-wrap gap-3 p-3 bg-zinc-900 border border-zinc-800 rounded">
+                <label className="text-[10px] font-bold text-zinc-500 uppercase">Varian Ukuran *</label>
+                <div className="flex flex-wrap gap-3 p-3 bg-zinc-50 border border-zinc-200 rounded">
                   {SIZE_OPTIONS.map((size) => (
-                    <label key={size} className="flex items-center gap-1.5 text-xs text-gray-300 cursor-pointer">
+                    <label key={size} className="flex items-center gap-1.5 text-xs text-zinc-700 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={selectedSizes.includes(size)}
                         onChange={() => handleSizeChange(size)}
-                        className="rounded accent-accent border-zinc-800 bg-zinc-900 h-4 w-4 cursor-pointer"
+                        className="rounded accent-primary border-zinc-200 bg-white h-4 w-4 cursor-pointer"
                       />
                       <span>{size}</span>
                     </label>
@@ -435,17 +551,18 @@ export default function AdminProducts() {
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-zinc-900 flex justify-end gap-3">
+              {/* Footer Modal Action */}
+              <div className="pt-4 border-t border-zinc-200 flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setIsFormOpen(false)}
-                  className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded px-4 py-2.5 text-xs text-gray-400 hover:text-white font-bold cursor-pointer transition-colors uppercase"
+                  className="bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 rounded px-4 py-2.5 text-xs text-zinc-600 font-bold cursor-pointer transition-colors uppercase"
                 >
                   BATAL
                 </button>
                 <button
                   type="submit"
-                  className="bg-white text-black hover:bg-accent hover:text-black font-black text-xs px-5 py-2.5 rounded cursor-pointer transition-colors uppercase"
+                  className="bg-primary text-white hover:bg-primary-hover font-black text-xs px-5 py-2.5 rounded cursor-pointer transition-colors uppercase"
                 >
                   SIMPAN
                 </button>

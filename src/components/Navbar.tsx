@@ -8,10 +8,9 @@ import { Search, User, ShoppingBag, Menu, X } from "lucide-react";
  * Komponen: Navbar Publik
  * 
  * Fitur:
- * - Desain premium transparan dengan efek glassmorphism (backdrop-blur)
- * - Responsif (tampilan mobile menggunakan menu hamburger)
- * - Tautan navigasi bergaya streetwear uppercase
- * - Tombol admin login diskret untuk memudahkan pengujian
+ * - Desain premium transparan berbasis warna #FFFFFF dengan efek glassmorphism.
+ * - Navigasi teks berwarna gelap dengan hover #002D72.
+ * - Responsif (tampilan mobile menggunakan menu hamburger).
  */
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,7 +21,7 @@ export default function Navbar() {
         <div className="flex h-20 items-center justify-between">
           {/* Logo / Brand Name */}
           <div className="flex-shrink-0">
-            <Link href="/" className="text-2xl font-black tracking-widest text-white hover:text-accent transition-colors duration-200">
+            <Link href="/" className="text-2xl font-black tracking-widest text-primary hover:opacity-80 transition-opacity duration-200">
               CORECULTURE
             </Link>
           </div>
@@ -30,36 +29,35 @@ export default function Navbar() {
           {/* Desktop Navigation Links */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
-              <Link href="/" className="text-xs font-semibold tracking-widest text-red-500 hover:text-white transition-colors duration-200 uppercase">
+              <Link href="/" className="text-xs font-black tracking-widest text-red-600 hover:text-primary transition-colors duration-200 uppercase">
                 SALE!
               </Link>
-              <Link href="#" className="text-xs font-semibold tracking-widest text-gray-300 hover:text-white transition-colors duration-200 uppercase">
+              <Link href="#" className="text-xs font-semibold tracking-widest text-zinc-600 hover:text-primary transition-colors duration-200 uppercase">
                 SHOP
               </Link>
-              <Link href="#" className="text-xs font-semibold tracking-widest text-gray-300 hover:text-white transition-colors duration-200 uppercase">
+              <Link href="#" className="text-xs font-semibold tracking-widest text-zinc-600 hover:text-primary transition-colors duration-200 uppercase">
                 COLLECTIONS
               </Link>
-              <Link href="#" className="text-xs font-semibold tracking-widest text-gray-300 hover:text-white transition-colors duration-200 uppercase">
+              <Link href="#" className="text-xs font-semibold tracking-widest text-zinc-600 hover:text-primary transition-colors duration-200 uppercase">
                 NEW ARRIVALS
               </Link>
-              {/* Shortcut diskret ke halaman admin */}
-              <Link href="/admin/login" className="text-xs font-semibold tracking-widest text-gray-500 hover:text-accent transition-colors duration-200 uppercase">
+              <Link href="/admin/login" className="text-xs font-bold tracking-widest text-zinc-400 hover:text-primary transition-colors duration-200 uppercase">
                 ADMIN PANEL
               </Link>
             </div>
           </div>
 
-          {/* Icons (Search, Admin/User, Bag) */}
-          <div className="hidden md:flex items-center space-x-6 text-gray-300">
-            <button className="hover:text-white cursor-pointer transition-colors duration-200" title="Cari">
+          {/* Icons */}
+          <div className="hidden md:flex items-center space-x-6 text-zinc-600">
+            <button className="hover:text-primary cursor-pointer transition-colors duration-200" title="Cari">
               <Search className="h-5 w-5" />
             </button>
-            <Link href="/admin/login" className="hover:text-white transition-colors duration-200" title="Admin Login">
+            <Link href="/admin/login" className="hover:text-primary transition-colors duration-200" title="Admin Login">
               <User className="h-5 w-5" />
             </Link>
-            <button className="hover:text-white cursor-pointer transition-colors duration-200 relative" title="Keranjang">
+            <button className="hover:text-primary cursor-pointer transition-colors duration-200 relative" title="Keranjang">
               <ShoppingBag className="h-5 w-5" />
-              <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[9px] font-bold text-black">
+              <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-white">
                 0
               </span>
             </button>
@@ -69,7 +67,7 @@ export default function Navbar() {
           <div className="flex md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-zinc-900 hover:text-white focus:outline-none"
+              className="inline-flex items-center justify-center rounded-md p-2 text-zinc-500 hover:bg-zinc-100 hover:text-primary focus:outline-none"
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -79,40 +77,40 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden bg-black/95 border-b border-zinc-800 animate-in fade-in slide-in-from-top-4 duration-200">
+        <div className="md:hidden bg-white border-b border-zinc-200 animate-in fade-in slide-in-from-top-4 duration-200">
           <div className="space-y-1 px-2 pb-6 pt-4 sm:px-3">
             <Link
               href="/"
               onClick={() => setIsOpen(false)}
-              className="block rounded-md px-3 py-2 text-base font-semibold tracking-widest text-red-500 hover:bg-zinc-900 uppercase"
+              className="block rounded-md px-3 py-2 text-base font-black tracking-widest text-red-600 hover:bg-zinc-50 uppercase"
             >
               SALE!
             </Link>
             <Link
               href="#"
               onClick={() => setIsOpen(false)}
-              className="block rounded-md px-3 py-2 text-base font-semibold tracking-widest text-gray-300 hover:bg-zinc-900 hover:text-white uppercase"
+              className="block rounded-md px-3 py-2 text-base font-semibold tracking-widest text-zinc-600 hover:bg-zinc-50 hover:text-primary uppercase"
             >
               SHOP
             </Link>
             <Link
               href="#"
               onClick={() => setIsOpen(false)}
-              className="block rounded-md px-3 py-2 text-base font-semibold tracking-widest text-gray-300 hover:bg-zinc-900 hover:text-white uppercase"
+              className="block rounded-md px-3 py-2 text-base font-semibold tracking-widest text-zinc-600 hover:bg-zinc-50 hover:text-primary uppercase"
             >
               COLLECTIONS
             </Link>
             <Link
               href="#"
               onClick={() => setIsOpen(false)}
-              className="block rounded-md px-3 py-2 text-base font-semibold tracking-widest text-gray-300 hover:bg-zinc-900 hover:text-white uppercase"
+              className="block rounded-md px-3 py-2 text-base font-semibold tracking-widest text-zinc-600 hover:bg-zinc-50 hover:text-primary uppercase"
             >
               NEW ARRIVALS
             </Link>
             <Link
               href="/admin/login"
               onClick={() => setIsOpen(false)}
-              className="block rounded-md px-3 py-2 text-base font-semibold tracking-widest text-accent hover:bg-zinc-900 uppercase"
+              className="block rounded-md px-3 py-2 text-base font-semibold tracking-widest text-primary hover:bg-zinc-50 uppercase"
             >
               ADMIN PANEL
             </Link>

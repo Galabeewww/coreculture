@@ -9,10 +9,7 @@ import { ShieldCheck, ArrowRight, Lock, User } from "lucide-react";
  * Halaman: Login Admin
  * Path: /admin/login
  * 
- * Fitur:
- * - Tampilan eksklusif bertema hitam minimalis dengan aksen neon border.
- * - Form interaktif dengan validasi login API menggunakan cookie HTTP-only.
- * - Navigasi otomatis ke dashboard admin (/admin) setelah login berhasil.
+ * Diperbarui ke tema warna baru: Canvas Putih dengan aksen #002D72 (Deep Blue).
  */
 export default function AdminLogin() {
   const router = useRouter();
@@ -36,7 +33,6 @@ export default function AdminLogin() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        // Redirect ke dashboard admin utama
         router.push("/admin");
         router.refresh();
       } else {
@@ -50,29 +46,29 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black px-4 sm:px-6 lg:px-8">
-      {/* Box Login Glassmorphic */}
-      <div className="w-full max-w-md space-y-8 bg-zinc-950 p-8 rounded-xl border border-zinc-900 shadow-2xl relative overflow-hidden">
+    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 sm:px-6 lg:px-8">
+      {/* Box Login */}
+      <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-xl border border-zinc-200 shadow-2xl relative overflow-hidden">
         
-        {/* Glow Line Aksen Neon */}
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-accent glow-accent" />
+        {/* Line Aksen Deep Blue */}
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-primary" />
 
         {/* Header Form */}
         <div className="text-center space-y-2">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-accent/10 border border-accent/20">
-            <ShieldCheck className="h-6 w-6 text-accent" />
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
+            <ShieldCheck className="h-6 w-6 text-primary" />
           </div>
-          <h2 className="text-xl font-black text-white tracking-widest uppercase">
+          <h2 className="text-xl font-black text-zinc-900 tracking-widest uppercase">
             CORECULTURE ADMIN
           </h2>
-          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+          <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">
             Security Gateway / Panel Administrasi
           </p>
         </div>
 
         {/* Feedback Pesan Error */}
         {error && (
-          <div className="rounded border border-red-500/20 bg-red-500/10 p-3 text-center text-xs font-semibold text-red-400">
+          <div className="rounded border border-red-200 bg-red-50 p-3 text-center text-xs font-semibold text-red-600">
             {error}
           </div>
         )}
@@ -83,7 +79,7 @@ export default function AdminLogin() {
             {/* Input Username */}
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <User className="h-4 w-4 text-zinc-500" />
+                <User className="h-4 w-4 text-zinc-400" />
               </div>
               <input
                 type="text"
@@ -91,14 +87,14 @@ export default function AdminLogin() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Username Admin"
-                className="w-full bg-zinc-900 border border-zinc-800 rounded pl-10 pr-3 py-3 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-accent transition-colors"
+                className="w-full bg-white border border-zinc-200 rounded pl-10 pr-3 py-3 text-xs text-zinc-800 placeholder-zinc-400 focus:outline-none focus:border-primary transition-colors"
               />
             </div>
 
             {/* Input Password */}
             <div className="relative">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <Lock className="h-4 w-4 text-zinc-500" />
+                <Lock className="h-4 w-4 text-zinc-400" />
               </div>
               <input
                 type="password"
@@ -106,7 +102,7 @@ export default function AdminLogin() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password Admin"
-                className="w-full bg-zinc-900 border border-zinc-800 rounded pl-10 pr-3 py-3 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-accent transition-colors"
+                className="w-full bg-white border border-zinc-200 rounded pl-10 pr-3 py-3 text-xs text-zinc-800 placeholder-zinc-400 focus:outline-none focus:border-primary transition-colors"
               />
             </div>
           </div>
@@ -116,10 +112,10 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative flex w-full justify-center rounded bg-white py-3.5 px-4 text-xs font-black text-black uppercase tracking-widest hover:bg-accent hover:text-black cursor-pointer transition-all duration-300 transform hover:scale-[1.01]"
+              className="group relative flex w-full justify-center rounded bg-primary py-3.5 px-4 text-xs font-black text-white uppercase tracking-widest hover:bg-primary-hover cursor-pointer transition-all duration-300 transform hover:scale-[1.01]"
             >
               {loading ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent" />
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
               ) : (
                 <span className="flex items-center gap-2">
                   MASUK <ArrowRight className="h-3.5 w-3.5" />
@@ -129,11 +125,11 @@ export default function AdminLogin() {
           </div>
         </form>
 
-        {/* Tautan Kembali ke Katalog */}
+        {/* Tautan Kembali */}
         <div className="text-center pt-2">
           <Link
             href="/"
-            className="text-[10px] font-bold text-gray-500 hover:text-white uppercase tracking-widest transition-colors duration-200"
+            className="text-[10px] font-bold text-zinc-400 hover:text-primary uppercase tracking-widest transition-colors duration-200"
           >
             ← Kembali ke Katalog Publik
           </Link>
