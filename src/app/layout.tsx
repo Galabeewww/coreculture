@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "CORECULTURE | Streetwear Fashion Catalog",
-  description: "Katalog fashion premium streetwear dari CORECULTURE. Temukan koleksi baju, celana, jaket, dan aksesoris eksklusif kami.",
+  description: "More than a sport. More than style. It’s who we are.",
 };
 
 export default function RootLayout({

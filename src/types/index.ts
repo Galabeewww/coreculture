@@ -20,11 +20,27 @@ export interface Product {
   description: string;
   price: number;
   stock: number;
-  imageFront: string;      // Gambar bagian depan (Base64 atau URL)
-  imageBack: string;       // Gambar bagian belakang (Base64 atau URL)
-  sizes: string[];         // Contoh: ['S', 'M', 'L', 'XL']
+  imageFront: string;
+  imageBack?: string | null;
+  sizes: string[];
   categoryId: string;
-  collectionId?: string | null; // ID Koleksi opsional (bisa kosong / null)
+  collectionId?: string | null;
+  createdAt?: string;
+}
+
+export interface PhotoshootEdition {
+  id: string;
+  name: string;        // e.g. "Vol.1", "Vol.2"
+  isActive: boolean;   // edisi yang ditampilkan di homepage
+  photos: PhotoshootImage[];
+  createdAt?: string;
+}
+
+export interface PhotoshootImage {
+  id: string;
+  imageUrl: string;
+  sortOrder: number;
+  editionId: string;
   createdAt?: string;
 }
 
@@ -32,5 +48,6 @@ export interface DashboardStats {
   totalCategories: number;
   totalProducts: number;
   totalStock: number;
-  totalCollections?: number; // Total koleksi untuk dashboard admin
+  totalCollections?: number;
+  totalPhotoshoots?: number;
 }

@@ -7,9 +7,9 @@ import prisma from "@/lib/prisma";
  * API Route: Login Admin
  * POST /api/auth/login
  * 
- * Syarat Baru:
- * - Hanya berfungsi jika database PostgreSQL/Supabase sudah terhubung (DATABASE_URL dikonfigurasi).
- * - Jika database belum terhubung, menolak login dengan pesan error 503 Service Unavailable.
+ * Syarat:
+ * - Memeriksa kredensial dari tabel `users` di database PostgreSQL (pgAdmin 4 / Supabase).
+ * - Jika database belum terhubung, menolak login dengan pesan error 503.
  */
 export async function POST(request: Request) {
   try {
@@ -40,8 +40,34 @@ export async function POST(request: Request) {
 
     const { username, password } = await request.json();
 
-    // 2. Validasi Kredensial Admin (admin / admin)
-    if (username === "admin" && password === "admin") {
+    if (!username || !password) {
+      return NextResponse.json(
+        { success: false, message: "Username dan password tidak boleh kosong" },
+        { status: 400 }
+      );
+    }
+
+    // 2. Validasi Kredensial Admin dari Tabel `users` PostgreSQL
+    let user = await prisma.user.findUnique({
+      where: { username: username.trim() },
+    });
+
+    // Jika tabel user belum ada akun admin sama sekali, auto-seed admin default
+    if (!user && username.trim() === "admin" && password === "admin") {
+      try {
+        user = await prisma.user.create({
+          data: {
+            username: "admin",
+            password: "admin",
+            name: "Administrator",
+          },
+        });
+      } catch (e) {
+        console.error("Auto create admin user exception:", e);
+      }
+    }
+
+    if (user && user.password === password) {
       const cookieStore = await cookies();
       cookieStore.set("coreculture_session", "authenticated_admin", {
         httpOnly: true,

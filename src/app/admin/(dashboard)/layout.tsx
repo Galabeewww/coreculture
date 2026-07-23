@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, FolderKanban, ShoppingBag, Bookmark, LogOut, ArrowLeft, Menu, X } from "lucide-react";
+import { LayoutDashboard, FolderKanban, ShoppingBag, Bookmark, Camera, LogOut, ArrowLeft, Menu, X } from "lucide-react";
 
 /**
  * Layout: Panel Admin Dashboard (Terproteksi)
@@ -78,6 +78,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
     { label: "Kategori", path: "/admin/categories", icon: <FolderKanban className="h-4.5 w-4.5" /> },
     { label: "Produk", path: "/admin/products", icon: <ShoppingBag className="h-4.5 w-4.5" /> },
     { label: "Koleksi", path: "/admin/collections", icon: <Bookmark className="h-4.5 w-4.5" /> },
+    { label: "Photoshoot", path: "/admin/photoshoots", icon: <Camera className="h-4.5 w-4.5" /> },
   ];
 
   return (

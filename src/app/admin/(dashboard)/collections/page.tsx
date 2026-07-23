@@ -2,7 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { Collection, Product } from "@/types";
-import { Plus, Edit2, Trash2, X, Check, Bookmark, RefreshCw } from "lucide-react";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  X,
+  Check,
+  Bookmark,
+  RefreshCw,
+} from "lucide-react";
 import Swal from "sweetalert2";
 
 /**
@@ -92,7 +100,9 @@ export default function AdminCollectionsPage() {
         Swal.fire({
           icon: "error",
           title: "Gagal!",
-          text: errorData.error || "Gagal menambahkan koleksi. Silakan pastikan Anda sudah login admin.",
+          text:
+            errorData.error ||
+            "Gagal menambahkan koleksi. Silakan pastikan Anda sudah login admin.",
           confirmButtonColor: "#002D72",
         });
       }
@@ -214,17 +224,22 @@ export default function AdminCollectionsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 pb-5">
         <div>
           <h1 className="text-xl font-black text-zinc-900 tracking-wider uppercase flex items-center gap-2">
-            <Bookmark className="h-5 w-5 text-primary" /> Kelola Koleksi Eksklusif
+            <Bookmark className="h-5 w-5 text-primary" /> Kelola Koleksi
+            Eksklusif
           </h1>
           <p className="text-xs text-zinc-500 mt-1">
-            Tambah, edit, dan hapus koleksi produk (misal: Edisi Kolaborasi Croire, Summer 2026, dll)
+            Tambah, edit, dan hapus koleksi produk (misal: Edisi Kolaborasi
+            Croire, Summer 2026, dll)
           </p>
         </div>
         <button
           onClick={fetchData}
           className="inline-flex items-center gap-2 text-xs font-bold text-zinc-600 hover:text-primary transition-colors cursor-pointer"
         >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
+          <RefreshCw
+            className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`}
+          />{" "}
+          Refresh
         </button>
       </div>
 
@@ -237,7 +252,9 @@ export default function AdminCollectionsPage() {
           </h2>
           <form onSubmit={handleCreate} className="space-y-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-zinc-500 uppercase">Nama Koleksi *</label>
+              <label className="text-[10px] font-bold text-zinc-500 uppercase">
+                Nama Koleksi *
+              </label>
               <input
                 type="text"
                 placeholder="Contoh: CORECULTURE x Croire"
@@ -248,7 +265,9 @@ export default function AdminCollectionsPage() {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-zinc-500 uppercase">Deskripsi (Opsional)</label>
+              <label className="text-[10px] font-bold text-zinc-500 uppercase">
+                Deskripsi (Opsional)
+              </label>
               <textarea
                 rows={3}
                 placeholder="Deskripsi singkat mengenai edisi koleksi ini..."
@@ -270,16 +289,22 @@ export default function AdminCollectionsPage() {
         {/* Tabel Daftar Koleksi */}
         <div className="lg:col-span-2 bg-white border border-zinc-200 rounded-lg shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-zinc-200 bg-zinc-50 flex items-center justify-between">
-            <span className="text-xs font-black text-zinc-700 uppercase tracking-wider">Daftar Koleksi</span>
+            <span className="text-xs font-black text-zinc-700 uppercase tracking-wider">
+              Daftar Koleksi
+            </span>
             <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
               {Array.isArray(collections) ? collections.length : 0} Koleksi
             </span>
           </div>
 
           {loading ? (
-            <div className="py-12 text-center text-xs text-zinc-400">Memuat data koleksi...</div>
+            <div className="py-12 text-center text-xs text-zinc-400">
+              Memuat data koleksi...
+            </div>
           ) : !Array.isArray(collections) || collections.length === 0 ? (
-            <div className="py-12 text-center text-xs text-zinc-400 font-semibold italic">Belum ada koleksi yang ditambahkan.</div>
+            <div className="py-12 text-center text-xs text-zinc-400 font-semibold italic">
+              Belum ada koleksi yang ditambahkan.
+            </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs text-zinc-800">
@@ -297,7 +322,10 @@ export default function AdminCollectionsPage() {
                     const count = getProductCount(col.id);
 
                     return (
-                      <tr key={col.id} className="hover:bg-zinc-50/50 transition-colors">
+                      <tr
+                        key={col.id}
+                        className="hover:bg-zinc-50/50 transition-colors"
+                      >
                         <td className="px-6 py-4">
                           {isEditing ? (
                             <input
@@ -308,8 +336,12 @@ export default function AdminCollectionsPage() {
                             />
                           ) : (
                             <div>
-                              <div className="font-bold text-zinc-900">{col.name}</div>
-                              <div className="text-[10px] text-zinc-400 font-mono">/collection/{col.slug}</div>
+                              <div className="font-bold text-zinc-900">
+                                {col.name}
+                              </div>
+                              {/* <div className="text-[10px] text-zinc-400 font-mono">
+                                /collection/{col.slug}
+                              </div> */}
                             </div>
                           )}
                         </td>
@@ -319,7 +351,9 @@ export default function AdminCollectionsPage() {
                             <textarea
                               rows={2}
                               value={editDescription}
-                              onChange={(e) => setEditDescription(e.target.value)}
+                              onChange={(e) =>
+                                setEditDescription(e.target.value)
+                              }
                               className="w-full bg-white border border-zinc-300 rounded px-2 py-1 text-xs text-zinc-900 focus:outline-none focus:border-primary"
                             />
                           ) : (

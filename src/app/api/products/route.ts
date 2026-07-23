@@ -32,12 +32,12 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, description, price, stock, imageFront, imageBack, sizes, categoryId } = body;
+    const { name, description, price, stock, imageFront, imageBack, sizes, categoryId, collectionId } = body;
 
-    // Validasi data input
-    if (!name || !price || !categoryId || stock === undefined || !imageFront || !imageBack) {
+    // Validasi data input (foto belakang opsional)
+    if (!name || !price || !categoryId || stock === undefined || !imageFront) {
       return NextResponse.json(
-        { error: "Atribut wajib produk tidak lengkap (nama, harga, kategori, stok, gambar depan & belakang)" },
+        { error: "Atribut wajib produk tidak lengkap (nama, harga, kategori, stok, dan gambar depan wajib)" },
         { status: 400 }
       );
     }
@@ -48,15 +48,17 @@ export async function POST(request: Request) {
       price: Number(price),
       stock: Number(stock),
       imageFront: imageFront.trim(),
-      imageBack: imageBack.trim(),
+      imageBack: imageBack?.trim() || null,
       sizes: Array.isArray(sizes) ? sizes : ["All Size"],
-      categoryId
+      categoryId,
+      collectionId: collectionId || null,
     });
 
     return NextResponse.json(newProduct, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
+    console.error("POST /api/products error:", error);
     return NextResponse.json(
-      { error: "Gagal membuat produk baru" },
+      { error: error?.message || "Gagal membuat produk baru" },
       { status: 500 }
     );
   }

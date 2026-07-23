@@ -199,7 +199,7 @@ export default function AdminProducts() {
       price: Number(price),
       stock: Number(stock),
       imageFront: imageFront.trim(),
-      imageBack: imageBack.trim() || imageFront.trim(),
+      imageBack: imageBack.trim(),
       sizes: selectedSizes.length > 0 ? selectedSizes : ["All Size"],
       categoryId,
       collectionId: collectionId || null
@@ -529,10 +529,15 @@ export default function AdminProducts() {
                       {imageFront ? (
                         <>
                           <img src={imageFront} alt="Preview Depan" className="w-full h-full object-cover absolute inset-0 z-0" />
-                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-                            <span className="text-white text-[10px] font-bold uppercase tracking-wider bg-red-600 px-2 py-1 rounded cursor-pointer" onClick={(e) => { e.preventDefault(); setImageFront(""); }}>
-                              GANTI
-                            </span>
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20">
+                            <button
+                              type="button"
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setImageFront(""); }}
+                              className="text-white text-[10px] font-bold uppercase tracking-wider bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded cursor-pointer flex items-center gap-1.5 shadow-md transition-colors z-30"
+                              title="Hapus Gambar Depan"
+                            >
+                              <Trash2 className="h-4 w-4" /> HAPUS
+                            </button>
                           </div>
                         </>
                       ) : (
@@ -555,15 +560,20 @@ export default function AdminProducts() {
 
                   {/* Unggah Gambar Belakang */}
                   <div className="space-y-2.5">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase">2. Foto Bagian Belakang</label>
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase">2. Foto Bagian Belakang (Opsional)</label>
                     <div className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-200 rounded-lg p-4 bg-zinc-50 relative aspect-[4/5] overflow-hidden group">
                       {imageBack ? (
                         <>
                           <img src={imageBack} alt="Preview Belakang" className="w-full h-full object-cover absolute inset-0 z-0" />
-                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-                            <span className="text-white text-[10px] font-bold uppercase tracking-wider bg-red-600 px-2 py-1 rounded cursor-pointer" onClick={(e) => { e.preventDefault(); setImageBack(""); }}>
-                              GANTI
-                            </span>
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20">
+                            <button
+                              type="button"
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setImageBack(""); }}
+                              className="text-white text-[10px] font-bold uppercase tracking-wider bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded cursor-pointer flex items-center gap-1.5 shadow-md transition-colors z-30"
+                              title="Hapus Gambar Belakang"
+                            >
+                              <Trash2 className="h-4 w-4" /> HAPUS
+                            </button>
                           </div>
                         </>
                       ) : (

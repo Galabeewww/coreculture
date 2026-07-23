@@ -31,8 +31,14 @@ export default function ProductCard({
   product,
   onOpenDetails,
 }: ProductCardProps) {
-  const isLowStock = product.stock > 0 && product.stock <= 15;
+  const isLowStock = product.stock > 0 && product.stock <= 10;
   const isOutOfStock = product.stock === 0;
+
+  const hasBackImage = Boolean(
+    product.imageBack &&
+    product.imageBack.trim() !== "" &&
+    product.imageBack.trim() !== product.imageFront.trim()
+  );
 
   return (
     <div
@@ -45,14 +51,17 @@ export default function ProductCard({
         <img
           src={product.imageFront}
           alt={product.name}
-          className="h-full w-full object-cover object-center absolute inset-0 transition-all duration-700 ease-in-out opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-105"
+          className={`h-full w-full object-cover object-center absolute inset-0 transition-all duration-700 ease-in-out scale-100 ${
+            hasBackImage
+              ? "opacity-100 group-hover:opacity-0 group-hover:scale-105"
+              : "opacity-100 group-hover:scale-105"
+          }`}
           loading="lazy"
         />
 
-        {/* Gambar Belakang (Tampil saat hover) */}
-        {product.imageBack && (
+        {hasBackImage && (
           <img
-            src={product.imageBack}
+            src={product.imageBack!}
             alt={`${product.name} Back`}
             className="h-full w-full object-cover object-center absolute inset-0 transition-all duration-700 ease-in-out opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100"
             loading="lazy"

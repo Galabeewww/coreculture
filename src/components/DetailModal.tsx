@@ -28,7 +28,10 @@ export default function DetailModal({ product, categoryName, onClose }: DetailMo
   if (!product) return null;
 
   const isOutOfStock = product.stock === 0;
-  const slides = [product.imageFront, product.imageBack].filter(Boolean);
+  const rawSlides = [product.imageFront, product.imageBack];
+  const slides: string[] = rawSlides
+    .filter((img): img is string => Boolean(img && img.trim() !== ""))
+    .filter((img, idx, arr) => idx === 0 || img.trim() !== arr[0]?.trim());
 
   const handleNextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
