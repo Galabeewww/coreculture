@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { PhotoshootEdition, PhotoshootImage } from "@/types";
-import { ChevronLeft, ChevronRight, Play, Pause, Camera, Layers, AlertCircle } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Play,
+  Pause,
+  Camera,
+  Layers,
+  AlertCircle,
+} from "lucide-react";
 
 export default function PhotoshootSlideshow() {
   const [edition, setEdition] = useState<PhotoshootEdition | null>(null);
@@ -30,7 +38,7 @@ export default function PhotoshootSlideshow() {
     if (!isPlaying || photos.length <= 1) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % photos.length);
-    }, 1000); // Berganti otomatis setiap 1 detik
+    }, 4000); // Berganti otomatis setiap 4 detik
 
     return () => clearInterval(timer);
   }, [isPlaying, photos.length]);
@@ -68,7 +76,7 @@ export default function PhotoshootSlideshow() {
               )}
             </h2>
             <p className="text-sm text-slate-400 mt-1">
-              Visualisasi koleksi streetwear model Coreculture • Pergantian otomatis 1 detik
+              Visualisasi koleksi streetwear model CORECULTURE
             </p>
           </div>
 
@@ -76,7 +84,8 @@ export default function PhotoshootSlideshow() {
           {photos.length > 0 && (
             <div className="flex items-center gap-4 self-start md:self-auto">
               <span className="text-xs font-mono tracking-widest text-slate-400 bg-slate-800/80 px-3 py-1.5 rounded-md border border-slate-700">
-                SLIDE {String(currentSlide + 1).padStart(2, "0")} / {String(photos.length).padStart(2, "0")}
+                SLIDE {String(currentSlide + 1).padStart(2, "0")} /{" "}
+                {String(photos.length).padStart(2, "0")}
               </span>
               <button
                 onClick={() => setIsPlaying(!isPlaying)}
@@ -108,7 +117,8 @@ export default function PhotoshootSlideshow() {
                 Photoshoot belum diupload/update
               </h3>
               <p className="text-sm text-slate-400">
-                Admin belum memilih edisi aktif atau mengunggah foto photoshoot untuk ditampilkan.
+                Admin belum memilih edisi aktif atau mengunggah foto photoshoot
+                untuk ditampilkan.
               </p>
             </div>
           </div>
@@ -145,9 +155,9 @@ export default function PhotoshootSlideshow() {
                 <span className="text-[10px] font-bold tracking-widest text-blue-300 bg-[#002D72]/80 px-2.5 py-1 rounded uppercase backdrop-blur-sm border border-blue-400/30">
                   {edition?.name} • CORECULTURE STUDIO
                 </span>
-                <p className="text-xs text-slate-300 hidden sm:block">
+                {/* <p className="text-xs text-slate-300 hidden sm:block">
                   Foto {currentSlide + 1} dari {photos.length}
-                </p>
+                </p> */}
               </div>
 
               {/* Navigation Arrows */}

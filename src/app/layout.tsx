@@ -15,6 +15,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "CORECULTURE | Streetwear Fashion Catalog",
   description: "More than a sport. More than style. It’s who we are.",
+  // TAMBAHKAN KODE INI UNTUK GANTI FAVICON
+  icons: {
+    icon: "/img/logo.webp", // Ganti dengan nama file logo Anda
+    apple: "/img/logo.webp", // Untuk perangkat Apple
+  },
 };
 
 export default function RootLayout({

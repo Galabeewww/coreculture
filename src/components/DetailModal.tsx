@@ -4,6 +4,7 @@ import { Product } from "@/types";
 import { X, ShoppingBag, CheckCircle, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { formatIDR } from "./ProductCard";
+import Swal from "sweetalert2";
 
 interface DetailModalProps {
   product: Product | null;
@@ -43,14 +44,21 @@ export default function DetailModal({ product, categoryName, onClose }: DetailMo
 
   const handleAddToBag = () => {
     if (!selectedSize && product.sizes.length > 0) {
-      alert("Silakan pilih ukuran terlebih dahulu!");
+      Swal.fire({
+        icon: "warning",
+        title: "Pilih Ukuran",
+        text: "Silakan pilih ukuran terlebih dahulu!",
+        confirmButtonColor: "#002D72",
+      });
       return;
     }
-    setIsAdded(true);
-    setTimeout(() => {
-      setIsAdded(false);
-      onClose();
-    }, 1800);
+    Swal.fire({
+      icon: "info",
+      title: "Fitur Dalam Pengembangan 🚧",
+      text: "Fitur Add to Bag sedang dalam tahap pengembangan. Silakan hubungi kami via WhatsApp untuk pemesanan langsung!",
+      confirmButtonColor: "#002D72",
+      confirmButtonText: "Mengerti",
+    });
   };
 
   return (

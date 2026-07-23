@@ -6,8 +6,9 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import DetailModal from "@/components/DetailModal";
 import PhotoshootSlideshow from "@/components/PhotoshootSlideshow";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import { Category, Product } from "@/types";
-import { Search, SlidersHorizontal, X, RefreshCw } from "lucide-react";
+import { Search, SlidersHorizontal, X, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 
 /**
  * Halaman Utama (Homepage) & Katalog Publik
@@ -16,6 +17,7 @@ import { Search, SlidersHorizontal, X, RefreshCw } from "lucide-react";
  * - Tema warna Premium: #002D72 (Deep Blue) sebagai aksen primer dan #FFFFFF sebagai latar kanvas.
  * - Hero banner lookbook bernuansa streetwear kontras tinggi.
  * - Pencarian reaktif, filter kategori, harga maks, dan ukuran varian.
+ * - Pagination otomatis jika produk > 8.
  */
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -32,6 +34,10 @@ export default function Home() {
 
   // State modal detail
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  // State pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const PRODUCTS_PER_PAGE = 8;
 
   const fetchData = async () => {
     setLoading(true);
@@ -95,10 +101,23 @@ export default function Home() {
     setMaxPrice(1000000);
     setSelectedSize("all");
     setSortBy("latest");
+    setCurrentPage(1);
   };
 
+  // Pagination
+  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * PRODUCTS_PER_PAGE,
+    currentPage * PRODUCTS_PER_PAGE
+  );
+
+  // Reset halaman saat filter berubah
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, maxPrice, selectedSize, sortBy]);
+
   return (
-    <div className="flex flex-col min-h-screen bg-white text-zinc-950">
+    <div className="flex flex-col min-h-screen bg-white text-zinc-950 animate-page-enter">
       <Navbar />
 
       {/* 1. HERO BANNER */}
@@ -123,7 +142,7 @@ export default function Home() {
             More than a sport. More than style. It’s who we are.
           </h1>
           <p className="text-white/80 text-xs md:text-sm font-semibold tracking-widest max-w-md mx-auto uppercase">
-            Tersedia Sekarang • Rilisan Terbatas Koleksi Urbanwear
+            Tersedia Sekarang • Rilisan Terbatas
           </p>
           <div className="pt-4">
             <a
@@ -303,14 +322,59 @@ export default function Home() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onOpenDetails={(p) => setSelectedProduct(p)}
-              />
-            ))}
+          <div className="space-y-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+              {paginatedProducts.map((product, idx) => (
+                <div key={product.id} className={`animate-fade-in-up stagger-${(idx % 8) + 1}`}>
+                  <ProductCard
+                    product={product}
+                    onOpenDetails={(p) => setSelectedProduct(p)}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 pt-6 pb-2">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="p-2.5 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  aria-label="Halaman Sebelumnya"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`min-w-[40px] h-[40px] rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${
+                      page === currentPage
+                        ? "bg-primary text-white shadow-md"
+                        : "bg-white text-zinc-700 border border-zinc-200 hover:bg-zinc-50"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="p-2.5 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  aria-label="Halaman Berikutnya"
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            )}
+
+            {/* Info jumlah produk */}
+            <p className="text-center text-[11px] text-zinc-400 font-medium uppercase tracking-wider">
+              Menampilkan {(currentPage - 1) * PRODUCTS_PER_PAGE + 1}–{Math.min(currentPage * PRODUCTS_PER_PAGE, filteredProducts.length)} dari {filteredProducts.length} produk
+            </p>
           </div>
         )}
       </main>
@@ -326,6 +390,9 @@ export default function Home() {
           onClose={() => setSelectedProduct(null)}
         />
       )}
+
+      {/* WhatsApp Floating Button */}
+      <WhatsAppButton />
 
       <Footer />
     </div>

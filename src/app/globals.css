@@ -246,14 +246,39 @@ input:focus, select:focus, textarea:focus {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* Universal Interactive Cursor Pointer & Button Hover */
+button, [role="button"], select, label[for], a {
+  cursor: pointer;
+}
+
+button:hover:not(:disabled), a:hover {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Keyframes Transisi Halaman Halus (Smooth Page Entrance) */
+@keyframes pageEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-enter {
+  animation: pageEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 /* Smooth page transitions */
 main {
-  animation: fadeIn 0.3s ease-out;
+  animation: pageEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Button press effect */
 button:active:not(:disabled) {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 
 /* =============================================

@@ -512,6 +512,79 @@ export async function createPhotoshootEdition(name: string): Promise<PhotoshootE
   return edition;
 }
 
+export async function updatePhotoshootEdition(id: string, name: string): Promise<PhotoshootEdition | null> {
+  if (isPrismaConfigured) {
+    try {
+      const data = await prisma.photoshootEdition.update({
+        where: { id },
+        data: { name },
+        include: { photos: { orderBy: { sortOrder: "asc" } } },
+      });
+      const updated: PhotoshootEdition = {
+        id: data.id,
+        name: data.name,
+        isActive: data.isActive,
+        createdAt: data.createdAt.toISOString(),
+        photos: data.photos.map((p) => ({
+          id: p.id,
+          imageUrl: p.imageUrl,
+          sortOrder: p.sortOrder,
+          editionId: p.editionId,
+          createdAt: p.createdAt.toISOString(),
+        })),
+      };
+      const idx = store.photoshootEditions.findIndex((e) => e.id === id);
+      if (idx !== -1) store.photoshootEditions[idx] = updated;
+      return updated;
+    } catch (err) {
+      console.error("Prisma exception (updatePhotoshootEdition):", err);
+      throw err;
+    }
+  }
+
+  const ed = store.photoshootEditions.find((e) => e.id === id);
+  if (ed) {
+    ed.name = name;
+    return ed;
+  }
+  return null;
+}
+
+export async function updatePhotoshootImage(imageId: string, imageUrl: string): Promise<PhotoshootImage | null> {
+  if (isPrismaConfigured) {
+    try {
+      const data = await prisma.photoshootImage.update({
+        where: { id: imageId },
+        data: { imageUrl },
+      });
+      const updated: PhotoshootImage = {
+        id: data.id,
+        imageUrl: data.imageUrl,
+        sortOrder: data.sortOrder,
+        editionId: data.editionId,
+        createdAt: data.createdAt.toISOString(),
+      };
+      for (const ed of store.photoshootEditions) {
+        const pIdx = ed.photos.findIndex((p) => p.id === imageId);
+        if (pIdx !== -1) ed.photos[pIdx] = updated;
+      }
+      return updated;
+    } catch (err) {
+      console.error("Prisma exception (updatePhotoshootImage):", err);
+      throw err;
+    }
+  }
+
+  for (const ed of store.photoshootEditions) {
+    const p = ed.photos.find((item) => item.id === imageId);
+    if (p) {
+      p.imageUrl = imageUrl;
+      return p;
+    }
+  }
+  return null;
+}
+
 export async function deletePhotoshootEdition(id: string): Promise<boolean> {
   if (isPrismaConfigured) {
     try {
