@@ -63,3 +63,23 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function DELETE() {
+  try {
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get("coreculture_session");
+    if (!sessionToken || sessionToken.value !== "authenticated_admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { deleteAllProducts } = await import("@/lib/db");
+    await deleteAllProducts();
+    return NextResponse.json({ success: true, message: "Semua produk berhasil dihapus" });
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error?.message || "Gagal menghapus semua produk" },
+      { status: 500 }
+    );
+  }
+}
+

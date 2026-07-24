@@ -210,8 +210,8 @@ export default function AdminPhotoshoots() {
     }
   };
 
-  // Step 1 Flow Upload: Pilih file ke DRAFT (Belum terupload ke server)
-  const handleSelectDraftFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Step 1 Flow Upload: Pilih file ke DRAFT dengan kompresi client-side
+  const handleSelectDraftFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
@@ -236,21 +236,22 @@ export default function AdminPhotoshoots() {
       return;
     }
 
-    // Buat preview data URL
-    const newPreviews: string[] = [];
-    let loadedCount = 0;
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        newPreviews.push(reader.result as string);
-        loadedCount++;
-        if (loadedCount === files.length) {
-          setDraftFiles((prev) => [...prev, ...files]);
-          setDraftPreviews((prev) => [...prev, ...newPreviews]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    try {
+      const { compressImageFile } = await import("@/lib/imageCompressor");
+      const compressedPreviews = await Promise.all(
+        files.map((file) => compressImageFile(file, 1600, 0.85))
+      );
+
+      setDraftFiles((prev) => [...prev, ...files]);
+      setDraftPreviews((prev) => [...prev, ...compressedPreviews]);
+    } catch (err) {
+      console.error("Gagal mengompresi gambar:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Gagal Memproses Gambar",
+        text: "Terjadi kesalahan saat memproses gambar.",
+      });
+    }
 
     e.target.value = "";
   };
@@ -493,6 +494,43 @@ export default function AdminPhotoshoots() {
     }
   };
 
+  // Handle Hapus Semua Edisi Photoshoot
+  const handleDeleteAllEditions = async () => {
+    const result = await Swal.fire({
+      title: "HAPUS SEMUA EDISI PHOTOSHOOT?",
+      text: "PERINGATAN: Seluruh edisi dan foto photoshoot akan dihapus secara permanen dari sistem!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#71717a",
+      confirmButtonText: "Ya, Hapus Semua!",
+      cancelButtonText: "Batal",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await fetch("/api/photoshoots/editions", { method: "DELETE" });
+      if (res.ok) {
+        setEditions([]);
+        setSelectedEditionId("");
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: "Semua edisi photoshoot telah dihapus.",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      } else {
+        const data = await res.json();
+        Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal menghapus semua edisi." });
+      }
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: "error", title: "Kesalahan!", text: "Gagal menghapus semua edisi." });
+    }
+  };
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-12 animate-fade-in">
       {/* Header Halaman */}
@@ -509,13 +547,23 @@ export default function AdminPhotoshoots() {
           </p>
         </div>
 
-        <button
-          onClick={() => setIsCreatingEdition(!isCreatingEdition)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#002D72] hover:bg-[#001D4A] text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 shadow-sm cursor-pointer"
-        >
-          <Plus size={16} />
-          {isCreatingEdition ? "Batal" : "Buat Edisi Baru (misal Vol.3)"}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {editions.length > 0 && (
+            <button
+              onClick={handleDeleteAllEditions}
+              className="px-3.5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
+            >
+              <Trash2 size={16} /> HAPUS SEMUA EDISI
+            </button>
+          )}
+          <button
+            onClick={() => setIsCreatingEdition(!isCreatingEdition)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#002D72] hover:bg-[#001D4A] text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 shadow-sm cursor-pointer"
+          >
+            <Plus size={16} />
+            {isCreatingEdition ? "Batal" : "Buat Edisi Baru (misal Vol.3)"}
+          </button>
+        </div>
       </div>
 
       {/* Form Buat Edisi Baru */}

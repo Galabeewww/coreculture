@@ -33,12 +33,12 @@ export default function PhotoshootSlideshow() {
 
   const photos: PhotoshootImage[] = edition?.photos || [];
 
-  // Rotasi otomatis setiap 1 detik
+  // Rotasi otomatis setiap 4 detik
   useEffect(() => {
     if (!isPlaying || photos.length <= 1) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % photos.length);
-    }, 1000); // 1 detik per foto
+    }, 4000); // 4 detik per foto
 
     return () => clearInterval(timer);
   }, [isPlaying, photos.length]);
@@ -76,7 +76,7 @@ export default function PhotoshootSlideshow() {
               )}
             </h2>
             <p className="text-sm text-slate-400 mt-1">
-              Visualisasi koleksi streetwear model CORECULTURE • Rotasi otomatis 1 detik
+              Visualisasi koleksi streetwear model CORECULTURE
             </p>
           </div>
 

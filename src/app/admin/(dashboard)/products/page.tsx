@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { Product, Category, Collection } from "@/types";
-import { Plus, Edit2, Trash2, X, Upload, Bookmark } from "lucide-react";
+import { Plus, Edit2, Trash2, X, Upload, Bookmark, Download, FileText } from "lucide-react";
 import { formatIDR } from "@/components/ProductCard";
 import Swal from "sweetalert2";
+import { exportToExcel, exportToPDF } from "@/lib/exportUtils";
 
 /**
  * Halaman CRUD Produk Admin
@@ -62,22 +63,12 @@ export default function AdminProducts() {
     if (!file) return;
     setUploadingFront(true);
     try {
-      const base64 = await processFile(file);
-      // Upload ke Cloudinary via API
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: base64 }),
-      });
-      if (res.ok) {
-        const { url } = await res.json();
-        setImageFront(url || base64);
-      } else {
-        setImageFront(base64);
-      }
+      const { compressImageFile } = await import("@/lib/imageCompressor");
+      const base64 = await compressImageFile(file, 1600, 0.85);
+      setImageFront(base64);
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Gagal!", text: "Gagal membaca/mengunggah file gambar." });
+      Swal.fire({ icon: "error", title: "Gagal!", text: "Gagal memproses berkas gambar depan." });
     } finally {
       setUploadingFront(false);
     }
@@ -88,22 +79,12 @@ export default function AdminProducts() {
     if (!file) return;
     setUploadingBack(true);
     try {
-      const base64 = await processFile(file);
-      // Upload ke Cloudinary via API
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: base64 }),
-      });
-      if (res.ok) {
-        const { url } = await res.json();
-        setImageBack(url || base64);
-      } else {
-        setImageBack(base64);
-      }
+      const { compressImageFile } = await import("@/lib/imageCompressor");
+      const base64 = await compressImageFile(file, 1600, 0.85);
+      setImageBack(base64);
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Gagal!", text: "Gagal membaca/mengunggah file gambar." });
+      Swal.fire({ icon: "error", title: "Gagal!", text: "Gagal memproses berkas gambar belakang." });
     } finally {
       setUploadingBack(false);
     }
@@ -293,21 +274,128 @@ export default function AdminProducts() {
     }
   };
 
+  const handleDeleteAllProducts = async () => {
+    const result = await Swal.fire({
+      title: "HAPUS SEMUA PRODUK?",
+      text: "PERINGATAN SANGAT PENTING: Seluruh katalog produk akan dihapus secara permanen dari sistem!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#71717a",
+      confirmButtonText: "Ya, Hapus Semua Produk!",
+      cancelButtonText: "Batal",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await fetch("/api/products", { method: "DELETE" });
+      if (res.ok) {
+        setProducts([]);
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: "Semua produk berhasil dihapus.",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      } else {
+        const data = await res.json();
+        Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal menghapus semua produk." });
+      }
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: "error", title: "Kesalahan!", text: "Koneksi server gagal." });
+    }
+  };
+
+  const handleExportExcel = () => {
+    const formattedData = products.map((p) => ({
+      name: p.name,
+      category: categories.find((c) => c.id === p.categoryId)?.name || p.categoryId,
+      collection: collections.find((c) => c.id === p.collectionId)?.name || "-",
+      price: formatIDR(p.price),
+      stock: p.stock,
+      sizes: p.sizes.join(", "),
+    }));
+
+    exportToExcel(
+      "laporan_katalog_produk_coreculture",
+      [
+        { key: "name", label: "Nama Produk" },
+        { key: "category", label: "Kategori" },
+        { key: "collection", label: "Koleksi" },
+        { key: "price", label: "Harga (IDR)" },
+        { key: "stock", label: "Stok Usaha" },
+        { key: "sizes", label: "Varian Ukuran" },
+      ],
+      formattedData
+    );
+  };
+
+  const handleExportPDF = () => {
+    const formattedData = products.map((p) => ({
+      name: p.name,
+      category: categories.find((c) => c.id === p.categoryId)?.name || p.categoryId,
+      collection: collections.find((c) => c.id === p.collectionId)?.name || "-",
+      price: formatIDR(p.price),
+      stock: p.stock,
+      sizes: p.sizes.join(", "),
+    }));
+
+    exportToPDF(
+      "Laporan Master Katalog Produk",
+      "CORECULTURE Product Inventory & Catalog Report",
+      [
+        { key: "name", label: "Nama Produk" },
+        { key: "category", label: "Kategori" },
+        { key: "collection", label: "Koleksi" },
+        { key: "price", label: "Harga" },
+        { key: "stock", label: "Stok" },
+        { key: "sizes", label: "Ukuran" },
+      ],
+      formattedData
+    );
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-200 pb-5">
         <div>
           <h2 className="text-2xl font-black text-zinc-900 tracking-wider uppercase">MANAGE PRODUCTS</h2>
           <p className="text-xs text-zinc-500 mt-1 uppercase">Pengelolaan katalog pakaian, aksesoris, dan koleksi</p>
         </div>
-        <button
-          onClick={openAddForm}
-          className="flex items-center gap-2 bg-primary text-white font-black text-xs px-4 py-3 rounded cursor-pointer shadow-md hover:bg-primary-hover transition-colors uppercase"
-        >
-          <Plus className="h-4 w-4" /> TAMBAH PRODUK BARU
-        </button>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={handleExportExcel}
+            className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
+          >
+            <Download size={14} /> Export Excel (.csv)
+          </button>
+          <button
+            onClick={handleExportPDF}
+            className="px-3.5 py-2 bg-[#002D72] hover:bg-[#001D4A] text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
+          >
+            <FileText size={14} /> Export PDF Report
+          </button>
+          {products.length > 0 && (
+            <button
+              onClick={handleDeleteAllProducts}
+              className="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
+            >
+              <Trash2 size={14} /> HAPUS SEMUA PRODUK
+            </button>
+          )}
+          <button
+            onClick={openAddForm}
+            className="flex items-center gap-2 bg-primary text-white font-black text-xs px-4 py-2.5 rounded-lg cursor-pointer shadow-md hover:bg-primary-hover transition-colors uppercase"
+          >
+            <Plus className="h-4 w-4" /> TAMBAH PRODUK BARU
+          </button>
+        </div>
       </div>
 
       {/* Tabel Produk */}

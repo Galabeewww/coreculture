@@ -15,26 +15,28 @@ export default cloudinary;
 
 /**
  * Helper fungsi untuk mengunggah berkas gambar (Base64 atau Data URL) ke Cloudinary
+ * Mengpertahankan aspect ratio asli tanpa memotong (crop) gambar.
  */
-export async function uploadToCloudinary(fileString: string, folderName = "coreculture_products"): Promise<string> {
+export async function uploadToCloudinary(fileString: string, folderName = "coreculture_photoshoots"): Promise<string> {
   // Jika kredensial Cloudinary belum diatur di .env, kembalikan gambar asli (Data URL/Base64) agar dev lokal tetap berjalan
   if (
     !process.env.CLOUDINARY_CLOUD_NAME &&
     !process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
   ) {
-    console.warn("Cloudinary credentials missing in .env. Falling back to inline image.");
+    console.warn("Cloudinary credentials missing in .env. Falling back to inline data URL.");
     return fileString;
   }
 
   try {
     const response = await cloudinary.uploader.upload(fileString, {
       folder: folderName,
-      transformation: [{ width: 1000, height: 1250, crop: "limit", quality: "auto" }],
+      // Tanpa crop paksa agar aspect ratio asli tetap terjaga 100%
+      quality: "auto",
     });
     return response.secure_url;
   } catch (error) {
     console.error("Cloudinary Upload Error:", error);
-    // Graceful fallback
+    // Graceful fallback jika terjadi error koneksi ke Cloudinary
     return fileString;
   }
 }

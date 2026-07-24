@@ -2,14 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { Category } from "@/types";
-import { Plus, Edit2, Trash2, X, Check } from "lucide-react";
+import { Plus, Edit2, Trash2, X, Check, Download, FileText } from "lucide-react";
 import Swal from "sweetalert2";
+import { exportToExcel, exportToPDF } from "@/lib/exportUtils";
 
 /**
  * Halaman Manajemen Kategori (CRUD)
  * Path: /admin/categories
- * 
- * Diperbarui dengan SweetAlert2 untuk konfirmasi hapus dan notifikasi pop-up.
  */
 export default function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -179,18 +178,102 @@ export default function AdminCategories() {
     }
   };
 
+  const handleDeleteAllCategories = async () => {
+    const result = await Swal.fire({
+      title: "HAPUS SEMUA KATEGORI?",
+      text: "PERINGATAN: Seluruh kategori dan produk di dalamnya akan dihapus secara permanen dari database!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#71717a",
+      confirmButtonText: "Ya, Hapus Semua!",
+      cancelButtonText: "Batal",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await fetch("/api/categories", { method: "DELETE" });
+      if (res.ok) {
+        setCategories([]);
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: "Semua kategori telah dihapus.",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      } else {
+        const data = await res.json();
+        Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal menghapus semua kategori." });
+      }
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: "error", title: "Kesalahan!", text: "Gagal menghapus semua kategori." });
+    }
+  };
+
+  const handleExportExcel = () => {
+    exportToExcel(
+      "laporan_kategori_coreculture",
+      [
+        { key: "name", label: "Nama Kategori" },
+        { key: "slug", label: "Slug" },
+        { key: "createdAt", label: "Tanggal Dibuat" },
+      ],
+      categories
+    );
+  };
+
+  const handleExportPDF = () => {
+    exportToPDF(
+      "Laporan Data Kategori Katalog",
+      "CORECULTURE Fashion Category Management",
+      [
+        { key: "name", label: "Nama Kategori" },
+        { key: "slug", label: "Slug URL" },
+        { key: "createdAt", label: "Tanggal Dibuat" },
+      ],
+      categories
+    );
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      
-      <div>
-        <h2 className="text-2xl font-black text-zinc-900 tracking-wider uppercase">MANAGE CATEGORIES</h2>
-        <p className="text-xs text-zinc-500 mt-1 uppercase">Pengelolaan kategori jenis produk katalog</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 pb-5">
+        <div>
+          <h2 className="text-2xl font-black text-zinc-900 tracking-wider uppercase">MANAGE CATEGORIES</h2>
+          <p className="text-xs text-zinc-500 mt-1 uppercase">Pengelolaan kategori jenis produk katalog</p>
+        </div>
+
+        {/* Action Buttons: Export & Delete All */}
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={handleExportExcel}
+            className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
+          >
+            <Download size={14} /> Export Excel (.csv)
+          </button>
+          <button
+            onClick={handleExportPDF}
+            className="px-3.5 py-2 bg-[#002D72] hover:bg-[#001D4A] text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
+          >
+            <FileText size={14} /> Export PDF Report
+          </button>
+          {categories.length > 0 && (
+            <button
+              onClick={handleDeleteAllCategories}
+              className="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
+            >
+              <Trash2 size={14} /> HAPUS SEMUA KATEGORI
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Kolom Kiri: Form Add */}
-        <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-6 h-fit space-y-6 shadow-sm">
+        {/* Form Add */}
+        <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-6 h-fit space-y-6 shadow-xs">
           <div>
             <h3 className="text-xs font-black text-zinc-800 tracking-wider uppercase">TAMBAH KATEGORI</h3>
             <p className="text-[10px] text-zinc-500 uppercase mt-0.5">Buat klasifikasi produk baru</p>
@@ -218,10 +301,10 @@ export default function AdminCategories() {
           </form>
         </div>
 
-        {/* Kolom Kanan: Tabel List */}
-        <div className="lg:col-span-2 bg-white border border-zinc-200 rounded-lg overflow-hidden shadow-sm">
-          <div className="px-6 py-5 border-b border-zinc-200 bg-zinc-50/50">
-            <h3 className="text-xs font-black text-zinc-800 tracking-widest uppercase">DAFTAR KATEGORI</h3>
+        {/* Tabel List */}
+        <div className="lg:col-span-2 bg-white border border-zinc-200 rounded-lg overflow-hidden shadow-xs">
+          <div className="px-6 py-5 border-b border-zinc-200 bg-zinc-50/50 flex items-center justify-between">
+            <h3 className="text-xs font-black text-zinc-800 tracking-widest uppercase">DAFTAR KATEGORI ({categories.length})</h3>
           </div>
 
           {loading ? (
@@ -307,9 +390,7 @@ export default function AdminCategories() {
             </div>
           )}
         </div>
-
       </div>
-
     </div>
   );
 }

@@ -435,7 +435,7 @@ export default function Home() {
       )}
 
       {/* WhatsApp Floating Button */}
-      <WhatsAppButton />
+      {/* <WhatsAppButton /> */}
 
       <Footer />
     </div>

@@ -793,4 +793,86 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   };
 }
 
+// ==========================================
+// DB LAYER: OPERASI BULK DELETE ("HAPUS SEMUA")
+// ==========================================
+
+export async function deleteAllCategories(): Promise<boolean> {
+  if (isPrismaConfigured) {
+    try {
+      // Hapus produk dulu agar tidak melanggar foreign key, atau cascading delete
+      await prisma.product.deleteMany({});
+      await prisma.category.deleteMany({});
+      store.categories = [];
+      store.products = [];
+      return true;
+    } catch (err) {
+      console.error("Prisma exception (deleteAllCategories):", err);
+      throw err;
+    }
+  }
+
+  store.categories = [];
+  store.products = [];
+  return true;
+}
+
+export async function deleteAllCollections(): Promise<boolean> {
+  if (isPrismaConfigured) {
+    try {
+      // Putus relasi collectionId di produk
+      await prisma.product.updateMany({ data: { collectionId: null } });
+      await prisma.collection.deleteMany({});
+      store.collections = [];
+      store.products.forEach((p) => {
+        p.collectionId = null;
+      });
+      return true;
+    } catch (err) {
+      console.error("Prisma exception (deleteAllCollections):", err);
+      throw err;
+    }
+  }
+
+  store.collections = [];
+  store.products.forEach((p) => {
+    p.collectionId = null;
+  });
+  return true;
+}
+
+export async function deleteAllProducts(): Promise<boolean> {
+  if (isPrismaConfigured) {
+    try {
+      await prisma.product.deleteMany({});
+      store.products = [];
+      return true;
+    } catch (err) {
+      console.error("Prisma exception (deleteAllProducts):", err);
+      throw err;
+    }
+  }
+
+  store.products = [];
+  return true;
+}
+
+export async function deleteAllPhotoshootEditions(): Promise<boolean> {
+  if (isPrismaConfigured) {
+    try {
+      await prisma.photoshootImage.deleteMany({});
+      await prisma.photoshootEdition.deleteMany({});
+      store.photoshootEditions = [];
+      return true;
+    } catch (err) {
+      console.error("Prisma exception (deleteAllPhotoshootEditions):", err);
+      throw err;
+    }
+  }
+
+  store.photoshootEditions = [];
+  return true;
+}
+
+
 

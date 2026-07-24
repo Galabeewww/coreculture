@@ -10,18 +10,15 @@ import {
   Check,
   Bookmark,
   RefreshCw,
+  Download,
+  FileText,
 } from "lucide-react";
 import Swal from "sweetalert2";
+import { exportToExcel, exportToPDF } from "@/lib/exportUtils";
 
 /**
  * Halaman Admin: Manajemen Koleksi (CRUD Collection)
  * Path: /admin/collections
- *
- * Fitur:
- * - Menampilkan daftar koleksi dan jumlah produk terhubung.
- * - Form Tambah Koleksi baru (Nama & Deskripsi).
- * - Edit Koleksi secara inline.
- * - Hapus Koleksi dengan konfirmasi SweetAlert2 (produk tidak dihapus, hanya dilepas dari koleksi).
  */
 export default function AdminCollectionsPage() {
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -218,35 +215,115 @@ export default function AdminCollectionsPage() {
     }
   };
 
+  // Hapus Semua Koleksi
+  const handleDeleteAllCollections = async () => {
+    const result = await Swal.fire({
+      title: "HAPUS SEMUA KOLEKSI?",
+      text: "PERINGATAN: Seluruh koleksi akan dihapus dari sistem. Produk tidak terhapus, hanya relasi koleksinya yang dilepas.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#71717a",
+      confirmButtonText: "Ya, Hapus Semua!",
+      cancelButtonText: "Batal",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await fetch("/api/collections", { method: "DELETE" });
+      if (res.ok) {
+        setCollections([]);
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: "Semua koleksi berhasil dihapus.",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      } else {
+        const data = await res.json();
+        Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal menghapus semua koleksi." });
+      }
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: "error", title: "Kesalahan!", text: "Gagal menghapus semua koleksi." });
+    }
+  };
+
+  const handleExportExcel = () => {
+    exportToExcel(
+      "laporan_koleksi_coreculture",
+      [
+        { key: "name", label: "Nama Koleksi" },
+        { key: "slug", label: "Slug" },
+        { key: "description", label: "Deskripsi" },
+      ],
+      collections
+    );
+  };
+
+  const handleExportPDF = () => {
+    exportToPDF(
+      "Laporan Data Koleksi Eksklusif",
+      "CORECULTURE Exclusive Collections Report",
+      [
+        { key: "name", label: "Nama Koleksi" },
+        { key: "slug", label: "Slug URL" },
+        { key: "description", label: "Deskripsi" },
+      ],
+      collections
+    );
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-300">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 pb-5">
         <div>
           <h1 className="text-xl font-black text-zinc-900 tracking-wider uppercase flex items-center gap-2">
-            <Bookmark className="h-5 w-5 text-primary" /> Kelola Koleksi
-            Eksklusif
+            <Bookmark className="h-5 w-5 text-primary" /> Kelola Koleksi Eksklusif
           </h1>
           <p className="text-xs text-zinc-500 mt-1">
-            Tambah, edit, dan hapus koleksi produk (misal: Edisi Kolaborasi
-            Croire, Summer 2026, dll)
+            Tambah, edit, dan hapus koleksi produk (misal: Edisi Kolaborasi Croire, Summer 2026, dll)
           </p>
         </div>
-        <button
-          onClick={fetchData}
-          className="inline-flex items-center gap-2 text-xs font-bold text-zinc-600 hover:text-primary transition-colors cursor-pointer"
-        >
-          <RefreshCw
-            className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`}
-          />{" "}
-          Refresh
-        </button>
+
+        {/* Action Buttons: Refresh, Export & Delete All */}
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={fetchData}
+            className="px-3 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
+          </button>
+          <button
+            onClick={handleExportExcel}
+            className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
+          >
+            <Download size={14} /> Export Excel (.csv)
+          </button>
+          <button
+            onClick={handleExportPDF}
+            className="px-3 py-2 bg-[#002D72] hover:bg-[#001D4A] text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
+          >
+            <FileText size={14} /> Export PDF Report
+          </button>
+          {collections.length > 0 && (
+            <button
+              onClick={handleDeleteAllCollections}
+              className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
+            >
+              <Trash2 size={14} /> HAPUS SEMUA KOLEKSI
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Grid: Form Tambah & Tabel Koleksi */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Form Tambah Koleksi */}
-        <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-6 space-y-4 h-fit shadow-sm">
+        <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-6 space-y-4 h-fit shadow-xs">
           <h2 className="text-xs font-black text-zinc-900 uppercase tracking-wider flex items-center gap-2 border-b border-zinc-200 pb-3">
             <Plus className="h-4 w-4 text-primary" /> Tambah Koleksi Baru
           </h2>
@@ -287,7 +364,7 @@ export default function AdminCollectionsPage() {
         </div>
 
         {/* Tabel Daftar Koleksi */}
-        <div className="lg:col-span-2 bg-white border border-zinc-200 rounded-lg shadow-sm overflow-hidden">
+        <div className="lg:col-span-2 bg-white border border-zinc-200 rounded-lg shadow-xs overflow-hidden">
           <div className="px-6 py-4 border-b border-zinc-200 bg-zinc-50 flex items-center justify-between">
             <span className="text-xs font-black text-zinc-700 uppercase tracking-wider">
               Daftar Koleksi
@@ -339,9 +416,6 @@ export default function AdminCollectionsPage() {
                               <div className="font-bold text-zinc-900">
                                 {col.name}
                               </div>
-                              {/* <div className="text-[10px] text-zinc-400 font-mono">
-                                /collection/{col.slug}
-                              </div> */}
                             </div>
                           )}
                         </td>
