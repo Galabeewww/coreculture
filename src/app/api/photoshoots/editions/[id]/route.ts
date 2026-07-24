@@ -10,6 +10,8 @@ import { cookies } from "next/headers";
  * DELETE - Hapus edisi beserta semua fotonya (Admin)
  */
 
+export const dynamic = "force-dynamic";
+
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }

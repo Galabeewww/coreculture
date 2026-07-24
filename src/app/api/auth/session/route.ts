@@ -7,6 +7,8 @@ import { cookies } from "next/headers";
  * 
  * Fitur: Memeriksa apakah cookie sesi admin masih valid dan aktif.
  */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const cookieStore = await cookies();

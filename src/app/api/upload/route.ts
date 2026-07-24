@@ -8,6 +8,8 @@ import { uploadToCloudinary } from "@/lib/cloudinary";
  * Payload: { image: string (base64 data URL) }
  * Return: { url: string (https://res.cloudinary.com/...) }
  */
+export const dynamic = "force-dynamic";
+
 export async function POST(request: Request) {
   try {
     const { image } = await request.json();
