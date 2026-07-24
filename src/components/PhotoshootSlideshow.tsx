@@ -8,7 +8,6 @@ import {
   Play,
   Pause,
   Camera,
-  Layers,
   AlertCircle,
 } from "lucide-react";
 
@@ -34,11 +33,12 @@ export default function PhotoshootSlideshow() {
 
   const photos: PhotoshootImage[] = edition?.photos || [];
 
+  // Rotasi otomatis setiap 1 detik
   useEffect(() => {
     if (!isPlaying || photos.length <= 1) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % photos.length);
-    }, 4000); // Berganti otomatis setiap 4 detik
+    }, 1000); // 1 detik per foto
 
     return () => clearInterval(timer);
   }, [isPlaying, photos.length]);
@@ -76,7 +76,7 @@ export default function PhotoshootSlideshow() {
               )}
             </h2>
             <p className="text-sm text-slate-400 mt-1">
-              Visualisasi koleksi streetwear model CORECULTURE
+              Visualisasi koleksi streetwear model CORECULTURE • Rotasi otomatis 1 detik
             </p>
           </div>
 
@@ -89,7 +89,7 @@ export default function PhotoshootSlideshow() {
               </span>
               <button
                 onClick={() => setIsPlaying(!isPlaying)}
-                className="p-2 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700"
+                className="p-2 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700 cursor-pointer"
                 title={isPlaying ? "Jeda Slideshow" : "Putar Slideshow"}
               >
                 {isPlaying ? <Pause size={16} /> : <Play size={16} />}
@@ -124,10 +124,10 @@ export default function PhotoshootSlideshow() {
           </div>
         )}
 
-        {/* Slideshow Display */}
+        {/* Slideshow Display (Ukuran Asli & Tidak Terpotong) */}
         {!loading && photos.length > 0 && (
           <div
-            className="relative w-full aspect-[16/9] sm:aspect-[21/9] bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl group"
+            className="relative w-full min-h-[420px] sm:min-h-[520px] md:min-h-[620px] max-h-[82vh] bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl flex items-center justify-center group"
             onMouseEnter={() => setIsPlaying(false)}
             onMouseLeave={() => setIsPlaying(true)}
           >
@@ -135,44 +135,51 @@ export default function PhotoshootSlideshow() {
             {photos.map((photo, idx) => (
               <div
                 key={photo.id}
-                className={`absolute inset-0 transition-opacity duration-300 ease-in-out ${
+                className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ease-in-out ${
                   idx === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
                 }`}
               >
+                {/* Latar Belakang Blur Gambar Asli (Soft Ambient Glow) */}
+                <img
+                  src={photo.imageUrl}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover opacity-25 blur-2xl scale-110 pointer-events-none"
+                />
+
+                {/* Foto Utama Mengikuti Ukuran Asli / Aspect Ratio Tanpa Terpotong */}
                 <img
                   src={photo.imageUrl}
                   alt={`Photoshoot ${idx + 1}`}
-                  className="w-full h-full object-cover object-center"
+                  className="relative z-10 max-h-[78vh] w-auto h-auto max-w-full object-contain mx-auto shadow-2xl transition-transform duration-500 group-hover:scale-[1.01]"
                 />
-                {/* Dynamic Gradient Overlay using brand tone */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#002D72]/90 via-slate-950/30 to-transparent" />
+
+                {/* Dynamic Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#002D72]/80 via-transparent to-black/20 pointer-events-none z-15" />
               </div>
             ))}
 
             {/* Bottom Content Tag */}
-            <div className="absolute bottom-6 left-6 right-6 z-20 flex items-end justify-between">
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold tracking-widest text-blue-300 bg-[#002D72]/80 px-2.5 py-1 rounded uppercase backdrop-blur-sm border border-blue-400/30">
-                  {edition?.name} • CORECULTURE STUDIO
+            <div className="absolute bottom-6 left-6 right-6 z-20 flex items-end justify-between pointer-events-none">
+              <div className="space-y-1 pointer-events-auto">
+                <span className="text-[10px] font-bold tracking-widest text-blue-300 bg-[#002D72]/85 px-3 py-1.5 rounded-lg uppercase backdrop-blur-md border border-blue-400/30 shadow-md inline-block">
+                  {edition?.name} • CORECULTURE LOOKBOOK
                 </span>
-                {/* <p className="text-xs text-slate-300 hidden sm:block">
-                  Foto {currentSlide + 1} dari {photos.length}
-                </p> */}
               </div>
 
               {/* Navigation Arrows */}
               {photos.length > 1 && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 pointer-events-auto">
                   <button
                     onClick={handlePrev}
-                    className="p-2.5 rounded-full bg-slate-900/80 hover:bg-[#002D72] text-white backdrop-blur-md border border-slate-700 hover:border-blue-400 transition-all shadow-lg active:scale-95"
+                    className="p-3 rounded-full bg-slate-900/85 hover:bg-[#002D72] text-white backdrop-blur-md border border-slate-700 hover:border-blue-400 transition-all shadow-lg active:scale-95 cursor-pointer"
                     aria-label="Foto Sebelumnya"
                   >
                     <ChevronLeft size={20} />
                   </button>
                   <button
                     onClick={handleNext}
-                    className="p-2.5 rounded-full bg-slate-900/80 hover:bg-[#002D72] text-white backdrop-blur-md border border-slate-700 hover:border-blue-400 transition-all shadow-lg active:scale-95"
+                    className="p-3 rounded-full bg-slate-900/85 hover:bg-[#002D72] text-white backdrop-blur-md border border-slate-700 hover:border-blue-400 transition-all shadow-lg active:scale-95 cursor-pointer"
                     aria-label="Foto Selanjutnya"
                   >
                     <ChevronRight size={20} />
@@ -181,14 +188,14 @@ export default function PhotoshootSlideshow() {
               )}
             </div>
 
-            {/* Pagination Dots (Bottom Right) */}
+            {/* Pagination Dots (Top Right) */}
             {photos.length > 1 && (
-              <div className="absolute top-6 right-6 z-20 flex items-center gap-1.5 bg-slate-900/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-800">
+              <div className="absolute top-6 right-6 z-20 flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-800 shadow-md">
                 {photos.map((_, idx) => (
                   <button
                     key={idx}
                     onClick={() => setCurrentSlide(idx)}
-                    className={`h-2 rounded-full transition-all duration-300 ${
+                    className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
                       idx === currentSlide
                         ? "w-6 bg-blue-500"
                         : "w-2 bg-slate-600 hover:bg-slate-400"

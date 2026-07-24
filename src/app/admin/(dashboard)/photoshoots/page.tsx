@@ -116,11 +116,19 @@ export default function AdminPhotoshoots() {
           showConfirmButton: false,
         });
       } else {
-        Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal membuat edisi." });
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: data.error || "Gagal membuat edisi.",
+        });
       }
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Kesalahan!", text: "Koneksi ke server gagal." });
+      Swal.fire({
+        icon: "error",
+        title: "Kesalahan!",
+        text: "Koneksi ke server gagal.",
+      });
     }
   };
 
@@ -138,7 +146,9 @@ export default function AdminPhotoshoots() {
       const data = await res.json();
       if (res.ok) {
         setEditions((prev) =>
-          prev.map((item) => (item.id === editingEditionId ? { ...item, name: data.name } : item))
+          prev.map((item) =>
+            item.id === editingEditionId ? { ...item, name: data.name } : item,
+          ),
         );
         setEditingEditionId(null);
         Swal.fire({
@@ -149,11 +159,19 @@ export default function AdminPhotoshoots() {
           showConfirmButton: false,
         });
       } else {
-        Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal memperbarui edisi." });
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: data.error || "Gagal memperbarui edisi.",
+        });
       }
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Kesalahan!", text: "Gagal memperbarui nama edisi." });
+      Swal.fire({
+        icon: "error",
+        title: "Kesalahan!",
+        text: "Gagal memperbarui nama edisi.",
+      });
     }
   };
 
@@ -165,7 +183,7 @@ export default function AdminPhotoshoots() {
       });
       if (res.ok) {
         setEditions((prev) =>
-          prev.map((e) => ({ ...e, isActive: e.id === editionId }))
+          prev.map((e) => ({ ...e, isActive: e.id === editionId })),
         );
         Swal.fire({
           icon: "success",
@@ -176,11 +194,19 @@ export default function AdminPhotoshoots() {
         });
       } else {
         const data = await res.json();
-        Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal mengaktifkan edisi." });
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: data.error || "Gagal mengaktifkan edisi.",
+        });
       }
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Kesalahan!", text: "Gagal mengaktifkan edisi." });
+      Swal.fire({
+        icon: "error",
+        title: "Kesalahan!",
+        text: "Gagal mengaktifkan edisi.",
+      });
     }
   };
 
@@ -262,11 +288,14 @@ export default function AdminPhotoshoots() {
       }
 
       // Kirim ke API edisi images
-      const res = await fetch(`/api/photoshoots/editions/${selectedEdition.id}/images`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageUrls }),
-      });
+      const res = await fetch(
+        `/api/photoshoots/editions/${selectedEdition.id}/images`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageUrls }),
+        },
+      );
 
       const data = await res.json();
       if (res.ok) {
@@ -281,11 +310,19 @@ export default function AdminPhotoshoots() {
           showConfirmButton: false,
         });
       } else {
-        Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal mengunggah foto." });
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: data.error || "Gagal mengunggah foto.",
+        });
       }
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Gagal!", text: "Gagal mengunggah foto ke server." });
+      Swal.fire({
+        icon: "error",
+        title: "Gagal!",
+        text: "Gagal mengunggah foto ke server.",
+      });
     } finally {
       setUploading(false);
     }
@@ -342,11 +379,19 @@ export default function AdminPhotoshoots() {
         });
       } else {
         const data = await res.json();
-        Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal memperbarui foto." });
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: data.error || "Gagal memperbarui foto.",
+        });
       }
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Kesalahan!", text: "Gagal memperbarui foto." });
+      Swal.fire({
+        icon: "error",
+        title: "Kesalahan!",
+        text: "Gagal memperbarui foto.",
+      });
     } finally {
       setUploading(false);
     }
@@ -382,11 +427,19 @@ export default function AdminPhotoshoots() {
         });
       } else {
         const data = await res.json();
-        Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal menghapus foto." });
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: data.error || "Gagal menghapus foto.",
+        });
       }
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Kesalahan!", text: "Gagal menghapus foto." });
+      Swal.fire({
+        icon: "error",
+        title: "Kesalahan!",
+        text: "Gagal menghapus foto.",
+      });
     }
   };
 
@@ -424,11 +477,19 @@ export default function AdminPhotoshoots() {
         });
       } else {
         const data = await res.json();
-        Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal menghapus edisi." });
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: data.error || "Gagal menghapus edisi.",
+        });
       }
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Kesalahan!", text: "Gagal menghapus edisi." });
+      Swal.fire({
+        icon: "error",
+        title: "Kesalahan!",
+        text: "Gagal menghapus edisi.",
+      });
     }
   };
 
@@ -442,7 +503,9 @@ export default function AdminPhotoshoots() {
             Kelola Photoshoot Model & Lookbook
           </h1>
           <p className="text-xs text-zinc-500 mt-1">
-            Pilih edisi melalui dropdown, pilih gambar ke daftar draft, dan tekan tombol <strong>Upload</strong> untuk memperbarui konten beranda.
+            Pilih edisi melalui dropdown, pilih gambar ke daftar draft, dan
+            tekan tombol <strong>Upload</strong> untuk memperbarui konten
+            beranda.
           </p>
         </div>
 
@@ -496,7 +559,8 @@ export default function AdminPhotoshoots() {
           </h3>
           <p className="text-xs text-amber-700 max-w-md mx-auto">
             Silakan klik tombol <strong>"Buat Edisi Baru"</strong> di atas untuk
-            membuat edisi seperti <strong>Vol.1, Vol.2, atau Vol.3</strong> terlebih dahulu.
+            membuat edisi seperti <strong>Vol.1, Vol.2, atau Vol.3</strong>{" "}
+            terlebih dahulu.
           </p>
         </div>
       ) : (
@@ -522,7 +586,8 @@ export default function AdminPhotoshoots() {
               >
                 {editions.map((ed) => (
                   <option key={ed.id} value={ed.id}>
-                    {ed.name} ({ed.photos.length}/10 Foto) {ed.isActive ? "★ [AKTIF BERANDA]" : ""}
+                    {ed.name} ({ed.photos.length}/10 Foto){" "}
+                    {ed.isActive ? "★ [AKTIF BERANDA]" : ""}
                   </option>
                 ))}
               </select>
@@ -544,14 +609,21 @@ export default function AdminPhotoshoots() {
                 {/* Tombol Set Active / Hapus */}
                 {!selectedEdition.isActive && (
                   <button
-                    onClick={() => handleSetActive(selectedEdition.id, selectedEdition.name)}
+                    onClick={() =>
+                      handleSetActive(selectedEdition.id, selectedEdition.name)
+                    }
                     className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
                   >
                     <CheckCircle2 size={14} /> Aktifkan di Beranda
                   </button>
                 )}
                 <button
-                  onClick={() => handleDeleteEdition(selectedEdition.id, selectedEdition.name)}
+                  onClick={() =>
+                    handleDeleteEdition(
+                      selectedEdition.id,
+                      selectedEdition.name,
+                    )
+                  }
                   className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 cursor-pointer"
                 >
                   <Trash2 size={14} /> Hapus Edisi
@@ -566,7 +638,9 @@ export default function AdminPhotoshoots() {
               onSubmit={handleUpdateEditionName}
               className="bg-zinc-100 border border-zinc-300 p-4 rounded-xl flex items-center gap-3 animate-scale-in"
             >
-              <span className="text-xs font-bold text-zinc-700">Edit Nama Edisi:</span>
+              <span className="text-xs font-bold text-zinc-700">
+                Edit Nama Edisi:
+              </span>
               <input
                 type="text"
                 value={editEditionName}
@@ -592,7 +666,6 @@ export default function AdminPhotoshoots() {
           {/* Edisi Terpilih Dashboard Controls */}
           {selectedEdition && (
             <div className="bg-white border border-zinc-200 rounded-xl p-6 shadow-xs space-y-6">
-              
               {/* ALUR UPLOAD TERSTRUKTUR: PILIH BERKAS -> BARU TEKAN UPLOAD */}
               <div className="space-y-4 border-2 border-dashed border-zinc-300 hover:border-[#002D72] transition-colors p-6 rounded-xl text-center bg-zinc-50/50">
                 <Upload className="w-8 h-8 text-[#002D72] mx-auto" />
@@ -601,14 +674,16 @@ export default function AdminPhotoshoots() {
                     Input Photoshoot Edisi "{selectedEdition.name}"
                   </h3>
                   <p className="text-xs text-zinc-500 max-w-lg mx-auto">
-                    1. Pilih 3–5 gambar dari perangkat Anda • 2. Periksa pratinjau draft • 3. Tekan tombol <strong>Upload / Simpan Photoshoot</strong> di bawah.
+                    1. Pilih beberapa gambar dari perangkat Anda • 2. Periksa
+                    pratinjau draft • 3. Tekan tombol{" "}
+                    <strong>Upload / Simpan Photoshoot</strong> di bawah.
                   </p>
                 </div>
 
                 {/* Input Pilihan Berkas */}
                 <div className="flex justify-center pt-2">
                   <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-zinc-900 hover:bg-black text-white text-xs font-bold rounded-lg cursor-pointer transition-all hover:scale-105 active:scale-95 shadow-sm">
-                    <Camera size={16} /> Pilih File Gambar (3–5 Foto)
+                    <Camera size={16} /> Pilih File Gambar
                     <input
                       type="file"
                       accept="image/*"
@@ -625,7 +700,8 @@ export default function AdminPhotoshoots() {
                   <div className="pt-4 border-t border-zinc-200 space-y-4 text-left animate-fade-in-up">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-zinc-700 uppercase">
-                        Draft Siap Di-upload ({draftPreviews.length} foto dipilih):
+                        Draft Siap Di-upload ({draftPreviews.length} foto
+                        dipilih):
                       </span>
                       <button
                         onClick={() => {
@@ -640,8 +716,15 @@ export default function AdminPhotoshoots() {
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                       {draftPreviews.map((src, idx) => (
-                        <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-zinc-300 bg-zinc-100">
-                          <img src={src} alt={`Draft ${idx}`} className="w-full h-full object-cover" />
+                        <div
+                          key={idx}
+                          className="relative group aspect-square rounded-lg overflow-hidden border border-zinc-300 bg-zinc-100"
+                        >
+                          <img
+                            src={src}
+                            alt={`Draft ${idx}`}
+                            className="w-full h-full object-cover"
+                          />
                           <button
                             onClick={() => removeDraftFile(idx)}
                             className="absolute top-1 right-1 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors cursor-pointer shadow"
@@ -663,7 +746,7 @@ export default function AdminPhotoshoots() {
                         <Upload size={16} />
                         {uploading
                           ? "Mengunggah Gambar ke Server..."
-                          : `PROSES UPLOAD NOW (${draftPreviews.length} FOTO SLIDESHOW)`}
+                          : `UPLOAD NOW (${draftPreviews.length} FOTO SLIDESHOW)`}
                       </button>
                     </div>
                   </div>
@@ -675,7 +758,7 @@ export default function AdminPhotoshoots() {
                 <div className="bg-blue-50 border border-blue-200 p-5 rounded-xl space-y-4 animate-scale-in">
                   <div className="flex items-center justify-between">
                     <h4 className="text-xs font-black text-[#002D72] uppercase tracking-wider flex items-center gap-1.5">
-                      <ImageIcon size={16} /> Ganti / Perbarui Foto Ini
+                      <ImageIcon size={16} /> Ganti Foto Ini
                     </h4>
                     <button
                       onClick={() => {
@@ -690,17 +773,31 @@ export default function AdminPhotoshoots() {
 
                   <div className="flex flex-col sm:flex-row items-center gap-4">
                     {replacementPreview ? (
-                      <img src={replacementPreview} alt="Replacement Preview" className="w-24 h-24 object-cover rounded-lg border border-zinc-300" />
+                      <img
+                        src={replacementPreview}
+                        alt="Replacement Preview"
+                        className="w-24 h-24 object-cover rounded-lg border border-zinc-300"
+                      />
                     ) : (
-                      <div className="w-24 h-24 bg-zinc-200 rounded-lg flex items-center justify-center text-zinc-400 text-xs font-bold">Pilih Foto</div>
+                      <div className="w-24 h-24 bg-zinc-200 rounded-lg flex items-center justify-center text-zinc-400 text-xs font-bold">
+                        Pilih Foto
+                      </div>
                     )}
 
                     <div className="space-y-2 flex-1">
                       <label className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-zinc-300 rounded text-xs font-bold text-zinc-800 hover:bg-zinc-50 cursor-pointer transition-colors">
                         Pilih Foto Pengganti Baru
-                        <input type="file" accept="image/*" onChange={handleSelectReplacement} className="hidden" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleSelectReplacement}
+                          className="hidden"
+                        />
                       </label>
-                      <p className="text-[11px] text-zinc-500">Pilih berkas baru lalu tekan tombol Simpan Perubahan di bawah.</p>
+                      <p className="text-[11px] text-zinc-500">
+                        Pilih berkas baru lalu tekan tombol Simpan Perubahan di
+                        bawah.
+                      </p>
                     </div>
 
                     <button
@@ -714,12 +811,13 @@ export default function AdminPhotoshoots() {
                 </div>
               )}
 
-              {/* Live Slideshow Preview Edisi (Rotasi 1 Detik) */}
+              {/* Live Slideshow Preview Edisi (Rotasi 1 Detik, Ukuran Asli) */}
               {photos.length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between border-b border-zinc-200 pb-2">
                     <h3 className="text-xs font-black text-zinc-700 uppercase tracking-wider flex items-center gap-2">
-                      <Camera size={14} className="text-[#002D72]" /> Live Preview Slideshow Beranda (1 Detik)
+                      <Camera size={14} className="text-[#002D72]" /> Live
+                      Preview Slideshow Beranda (1 Detik • Ukuran Asli)
                     </h3>
                     <div className="flex items-center gap-3">
                       <span className="text-[11px] font-mono text-zinc-500">
@@ -729,18 +827,28 @@ export default function AdminPhotoshoots() {
                         onClick={() => setIsPreviewPlaying(!isPreviewPlaying)}
                         className="p-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded transition-colors cursor-pointer"
                       >
-                        {isPreviewPlaying ? <Pause size={14} /> : <Play size={14} />}
+                        {isPreviewPlaying ? (
+                          <Pause size={14} />
+                        ) : (
+                          <Play size={14} />
+                        )}
                       </button>
                     </div>
                   </div>
 
-                  <div className="relative w-full aspect-[21/9] bg-zinc-950 rounded-xl overflow-hidden shadow-md">
+                  <div className="relative w-full h-[360px] sm:h-[450px] bg-zinc-950 rounded-xl overflow-hidden shadow-md flex items-center justify-center">
+                    <img
+                      src={photos[previewIndex]?.imageUrl}
+                      alt=""
+                      aria-hidden="true"
+                      className="absolute inset-0 w-full h-full object-cover opacity-25 blur-xl pointer-events-none"
+                    />
                     <img
                       src={photos[previewIndex]?.imageUrl}
                       alt="Preview"
-                      className="w-full h-full object-cover transition-all duration-300"
+                      className="relative z-10 max-h-full max-w-full object-contain mx-auto transition-all duration-300"
                     />
-                    <div className="absolute bottom-3 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded text-white text-[11px] font-bold">
+                    <div className="absolute bottom-3 left-4 z-20 bg-black/70 backdrop-blur-md px-3 py-1 rounded text-white text-[11px] font-bold">
                       {selectedEdition.name} • SLIDE {previewIndex + 1} / {photos.length}
                     </div>
                   </div>

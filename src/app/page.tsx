@@ -8,7 +8,14 @@ import DetailModal from "@/components/DetailModal";
 import PhotoshootSlideshow from "@/components/PhotoshootSlideshow";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { Category, Product } from "@/types";
-import { Search, SlidersHorizontal, X, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Search,
+  SlidersHorizontal,
+  X,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 /**
  * Halaman Utama (Homepage) & Katalog Publik
@@ -38,6 +45,9 @@ export default function Home() {
   // State pagination
   const [currentPage, setCurrentPage] = useState(1);
   const PRODUCTS_PER_PAGE = 8;
+
+  // State untuk animasi transisi tombol Belanja Sekarang
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -108,13 +118,29 @@ export default function Home() {
   const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * PRODUCTS_PER_PAGE,
-    currentPage * PRODUCTS_PER_PAGE
+    currentPage * PRODUCTS_PER_PAGE,
   );
 
   // Reset halaman saat filter berubah
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, selectedCategory, maxPrice, selectedSize, sortBy]);
+
+  // Fungsi untuk handle klik Belanja Sekarang dengan delay & animasi
+  const handleShopNow = () => {
+    setIsNavigating(true);
+
+    // Delay 300ms untuk memberikan efek transisi pada tombol sebelum mulai scroll
+    setTimeout(() => {
+      document.getElementById("katalog")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+
+      // Reset state setelah scroll selesai (perkiraan 800ms)
+      setTimeout(() => setIsNavigating(false), 800);
+    }, 300);
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-zinc-950 animate-page-enter">
@@ -123,7 +149,7 @@ export default function Home() {
       {/* 1. HERO BANNER */}
       <header className="relative w-full h-[85vh] overflow-hidden bg-zinc-900 flex items-center justify-center">
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-70 scale-100 animate-[pulse_10s_infinite]"
+          className="absolute inset-0 bg-cover bg-center opacity-100 scale-100 animate-[pulse_10s_infinite]"
           style={{
             backgroundImage: "url('/img/p.jpg')",
           }}
@@ -138,19 +164,24 @@ export default function Home() {
           <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white uppercase select-none">
             CORECULTURE
           </h1>
-          <h1 className="text-5xl md:text-3xl font-black tracking-tighter text-white uppercase select-none mt-7">
+          <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-white uppercase select-none mt-7">
             More than a sport. More than style. It’s who we are.
           </h1>
           <p className="text-white/80 text-xs md:text-sm font-semibold tracking-widest max-w-md mx-auto uppercase">
             Tersedia Sekarang • Rilisan Terbatas
           </p>
           <div className="pt-4">
-            <a
-              href="#katalog"
-              className="inline-block bg-white text-primary font-black text-xs tracking-widest px-8 py-4 rounded hover:bg-zinc-100 transition-all duration-300 transform hover:scale-105 shadow-md"
+            <button
+              onClick={handleShopNow}
+              disabled={isNavigating}
+              className={`inline-block font-black text-xs tracking-widest px-8 py-4 rounded transition-all duration-300 transform shadow-md cursor-pointer ${
+                isNavigating
+                  ? "bg-zinc-800 text-white scale-95"
+                  : "bg-white text-primary hover:bg-zinc-100 hover:scale-105"
+              }`}
             >
-              BELANJA SEKARANG
-            </a>
+              {isNavigating ? "MENGARAH KE KATALOG..." : "BELANJA SEKARANG"}
+            </button>
           </div>
         </div>
       </header>
@@ -325,7 +356,10 @@ export default function Home() {
           <div className="space-y-10">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
               {paginatedProducts.map((product, idx) => (
-                <div key={product.id} className={`animate-fade-in-up stagger-${(idx % 8) + 1}`}>
+                <div
+                  key={product.id}
+                  className={`animate-fade-in-up stagger-${(idx % 8) + 1}`}
+                >
                   <ProductCard
                     product={product}
                     onOpenDetails={(p) => setSelectedProduct(p)}
@@ -346,22 +380,26 @@ export default function Home() {
                   <ChevronLeft size={18} />
                 </button>
 
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`min-w-[40px] h-[40px] rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${
-                      page === currentPage
-                        ? "bg-primary text-white shadow-md"
-                        : "bg-white text-zinc-700 border border-zinc-200 hover:bg-zinc-50"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`min-w-[40px] h-[40px] rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${
+                        page === currentPage
+                          ? "bg-primary text-white shadow-md"
+                          : "bg-white text-zinc-700 border border-zinc-200 hover:bg-zinc-50"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ),
+                )}
 
                 <button
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
                   disabled={currentPage === totalPages}
                   className="p-2.5 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                   aria-label="Halaman Berikutnya"
@@ -373,7 +411,12 @@ export default function Home() {
 
             {/* Info jumlah produk */}
             <p className="text-center text-[11px] text-zinc-400 font-medium uppercase tracking-wider">
-              Menampilkan {(currentPage - 1) * PRODUCTS_PER_PAGE + 1}–{Math.min(currentPage * PRODUCTS_PER_PAGE, filteredProducts.length)} dari {filteredProducts.length} produk
+              Menampilkan {(currentPage - 1) * PRODUCTS_PER_PAGE + 1}–
+              {Math.min(
+                currentPage * PRODUCTS_PER_PAGE,
+                filteredProducts.length,
+              )}{" "}
+              dari {filteredProducts.length} produk
             </p>
           </div>
         )}

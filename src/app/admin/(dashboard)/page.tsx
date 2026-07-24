@@ -191,13 +191,13 @@ export default function AdminDashboard() {
         <div className="bg-zinc-50 border border-zinc-200 p-6 rounded-lg space-y-4 hover:border-zinc-300 transition-colors shadow-sm hover-lift animate-fade-in-up stagger-7">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-zinc-500 tracking-wider uppercase">
-              Foto Photoshoot
+              Edisi Photoshoot
             </span>
             <Camera className="h-5 w-5 text-primary" />
           </div>
           <div className="flex items-baseline justify-between">
             <span className="text-3xl font-black text-zinc-900">
-              {stats.totalPhotoshoots || 0} / 10
+              {stats.totalPhotoshoots || 0}
             </span>
             <Link
               href="/admin/photoshoots"
