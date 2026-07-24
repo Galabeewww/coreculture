@@ -168,7 +168,7 @@ export default function Home() {
             More than a sport. More than style. It’s who we are.
           </h1>
           <p className="text-white/80 text-xs md:text-sm font-semibold tracking-widest max-w-md mx-auto uppercase">
-            Tersedia Sekarang • Rilisan Terbatas
+            Tersedia Sekarang • Footbal Culture
           </p>
           <div className="pt-4">
             <button
