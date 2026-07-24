@@ -151,7 +151,7 @@ export default function Home() {
         <div
           className="absolute inset-0 bg-cover bg-center opacity-100 scale-100 animate-[pulse_10s_infinite]"
           style={{
-            backgroundImage: "url('/img/p.jpg')",
+            backgroundImage: "url('/img/bhb.JPG')",
           }}
         />
         {/* Overlay gradasi biru-hitam premium */}
@@ -168,7 +168,7 @@ export default function Home() {
             More than a sport. More than style. It’s who we are.
           </h1>
           <p className="text-white/80 text-xs md:text-sm font-semibold tracking-widest max-w-md mx-auto uppercase">
-            Tersedia Sekarang • Footbal Culture
+            Tersedia Sekarang • Casual Footbal Culture
           </p>
           <div className="pt-4">
             <button
