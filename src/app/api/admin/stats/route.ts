@@ -9,6 +9,8 @@ import { cookies } from "next/headers";
  * Fitur: Mengambil total produk, total kategori, dan total stok untuk dashboard admin.
  * Proteksi: Mengecek status login admin dari cookie sebelum menyajikan data sensitif.
  */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     // Validasi sesi admin

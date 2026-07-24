@@ -10,6 +10,8 @@ import { cookies } from "next/headers";
  * POST - Menambahkan kategori baru (Terproteksi, hanya Admin)
  */
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const categories = await getCategories();

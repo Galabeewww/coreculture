@@ -6,6 +6,8 @@ import { getActiveEditionPhotos } from "@/lib/db";
  * Path: /api/photoshoots/active
  */
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const activeEdition = await getActiveEditionPhotos();

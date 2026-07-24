@@ -10,6 +10,8 @@ import { cookies } from "next/headers";
  * POST - Menambahkan produk baru (Terproteksi, hanya Admin)
  */
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const products = await getProducts();

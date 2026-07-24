@@ -7,6 +7,8 @@ import { cookies } from "next/headers";
  * Path: /api/photoshoots/editions
  */
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const editions = await getPhotoshootEditions();
