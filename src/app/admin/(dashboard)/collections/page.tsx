@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { exportToExcel, exportToPDF } from "@/lib/exportUtils";
+import AdminPagination from "@/components/AdminPagination";
 
 /**
  * Halaman Admin: Manajemen Koleksi (CRUD Collection)
@@ -24,6 +25,12 @@ export default function AdminCollectionsPage() {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Pagination state (7 item per halaman)
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 7;
+  const totalPages = Math.ceil(collections.length / itemsPerPage);
+  const paginatedCollections = collections.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   // State Form Tambah
   const [name, setName] = useState("");
@@ -394,7 +401,7 @@ export default function AdminCollectionsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-200">
-                  {collections.map((col) => {
+                  {paginatedCollections.map((col) => {
                     const isEditing = editingId === col.id;
                     const count = getProductCount(col.id);
 
@@ -485,6 +492,14 @@ export default function AdminCollectionsPage() {
                   })}
                 </tbody>
               </table>
+
+              <AdminPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                totalItems={collections.length}
+                itemsPerPage={itemsPerPage}
+              />
             </div>
           )}
         </div>

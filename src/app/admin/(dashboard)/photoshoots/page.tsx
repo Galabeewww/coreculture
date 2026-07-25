@@ -211,7 +211,9 @@ export default function AdminPhotoshoots() {
   };
 
   // Step 1 Flow Upload: Pilih file ke DRAFT dengan kompresi client-side
-  const handleSelectDraftFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSelectDraftFiles = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
@@ -239,7 +241,7 @@ export default function AdminPhotoshoots() {
     try {
       const { compressImageFile } = await import("@/lib/imageCompressor");
       const compressedPreviews = await Promise.all(
-        files.map((file) => compressImageFile(file, 1600, 0.85))
+        files.map((file) => compressImageFile(file, 1600, 0.85)),
       );
 
       setDraftFiles((prev) => [...prev, ...files]);
@@ -510,7 +512,9 @@ export default function AdminPhotoshoots() {
     if (!result.isConfirmed) return;
 
     try {
-      const res = await fetch("/api/photoshoots/editions", { method: "DELETE" });
+      const res = await fetch("/api/photoshoots/editions", {
+        method: "DELETE",
+      });
       if (res.ok) {
         setEditions([]);
         setSelectedEditionId("");
@@ -523,11 +527,19 @@ export default function AdminPhotoshoots() {
         });
       } else {
         const data = await res.json();
-        Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal menghapus semua edisi." });
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: data.error || "Gagal menghapus semua edisi.",
+        });
       }
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Kesalahan!", text: "Gagal menghapus semua edisi." });
+      Swal.fire({
+        icon: "error",
+        title: "Kesalahan!",
+        text: "Gagal menghapus semua edisi.",
+      });
     }
   };
 
@@ -897,7 +909,8 @@ export default function AdminPhotoshoots() {
                       className="relative z-10 max-h-full max-w-full object-contain mx-auto transition-all duration-300"
                     />
                     <div className="absolute bottom-3 left-4 z-20 bg-black/70 backdrop-blur-md px-3 py-1 rounded text-white text-[11px] font-bold">
-                      {selectedEdition.name} • SLIDE {previewIndex + 1} / {photos.length}
+                      {selectedEdition.name} • SLIDE {previewIndex + 1} /{" "}
+                      {photos.length}
                     </div>
                   </div>
                 </div>

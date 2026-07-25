@@ -2,9 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { Category } from "@/types";
-import { Plus, Edit2, Trash2, X, Check, Download, FileText } from "lucide-react";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  X,
+  Check,
+  Download,
+  FileText,
+} from "lucide-react";
 import Swal from "sweetalert2";
 import { exportToExcel, exportToPDF } from "@/lib/exportUtils";
+import AdminPagination from "@/components/AdminPagination";
 
 /**
  * Halaman Manajemen Kategori (CRUD)
@@ -13,6 +22,12 @@ import { exportToExcel, exportToPDF } from "@/lib/exportUtils";
 export default function AdminCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Pagination state (7 item per halaman)
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 7;
+  const totalPages = Math.ceil(categories.length / itemsPerPage);
+  const paginatedCategories = categories.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const [newCatName, setNewCatName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -205,11 +220,19 @@ export default function AdminCategories() {
         });
       } else {
         const data = await res.json();
-        Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal menghapus semua kategori." });
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: data.error || "Gagal menghapus semua kategori.",
+        });
       }
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Kesalahan!", text: "Gagal menghapus semua kategori." });
+      Swal.fire({
+        icon: "error",
+        title: "Kesalahan!",
+        text: "Gagal menghapus semua kategori.",
+      });
     }
   };
 
@@ -221,7 +244,7 @@ export default function AdminCategories() {
         { key: "slug", label: "Slug" },
         { key: "createdAt", label: "Tanggal Dibuat" },
       ],
-      categories
+      categories,
     );
   };
 
@@ -234,7 +257,7 @@ export default function AdminCategories() {
         { key: "slug", label: "Slug URL" },
         { key: "createdAt", label: "Tanggal Dibuat" },
       ],
-      categories
+      categories,
     );
   };
 
@@ -242,8 +265,12 @@ export default function AdminCategories() {
     <div className="space-y-8 animate-in fade-in duration-300">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 pb-5">
         <div>
-          <h2 className="text-2xl font-black text-zinc-900 tracking-wider uppercase">MANAGE CATEGORIES</h2>
-          <p className="text-xs text-zinc-500 mt-1 uppercase">Pengelolaan kategori jenis produk katalog</p>
+          <h2 className="text-2xl font-black text-zinc-900 tracking-wider uppercase">
+            MANAGE CATEGORIES
+          </h2>
+          <p className="text-xs text-zinc-500 mt-1 uppercase">
+            Pengelolaan kategori jenis produk katalog
+          </p>
         </div>
 
         {/* Action Buttons: Export & Delete All */}
@@ -275,13 +302,19 @@ export default function AdminCategories() {
         {/* Form Add */}
         <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-6 h-fit space-y-6 shadow-xs">
           <div>
-            <h3 className="text-xs font-black text-zinc-800 tracking-wider uppercase">TAMBAH KATEGORI</h3>
-            <p className="text-[10px] text-zinc-500 uppercase mt-0.5">Buat klasifikasi produk baru</p>
+            <h3 className="text-xs font-black text-zinc-800 tracking-wider uppercase">
+              TAMBAH KATEGORI
+            </h3>
+            <p className="text-[10px] text-zinc-500 uppercase mt-0.5">
+              Buat klasifikasi produk baru
+            </p>
           </div>
 
           <form onSubmit={handleAddCategory} className="space-y-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-zinc-500 uppercase">Nama Kategori</label>
+              <label className="text-[10px] font-bold text-zinc-500 uppercase">
+                Nama Kategori
+              </label>
               <input
                 type="text"
                 placeholder="Contoh: Jaket, Celana, Aksesoris"
@@ -304,7 +337,9 @@ export default function AdminCategories() {
         {/* Tabel List */}
         <div className="lg:col-span-2 bg-white border border-zinc-200 rounded-lg overflow-hidden shadow-xs">
           <div className="px-6 py-5 border-b border-zinc-200 bg-zinc-50/50 flex items-center justify-between">
-            <h3 className="text-xs font-black text-zinc-800 tracking-widest uppercase">DAFTAR KATEGORI ({categories.length})</h3>
+            <h3 className="text-xs font-black text-zinc-800 tracking-widest uppercase">
+              DAFTAR KATEGORI ({categories.length})
+            </h3>
           </div>
 
           {loading ? (
@@ -326,8 +361,11 @@ export default function AdminCategories() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-200">
-                  {categories.map((cat) => (
-                    <tr key={cat.id} className="hover:bg-zinc-50 transition-colors">
+                  {paginatedCategories.map((cat) => (
+                    <tr
+                      key={cat.id}
+                      className="hover:bg-zinc-50 transition-colors"
+                    >
                       <td className="px-6 py-4">
                         {editingId === cat.id ? (
                           <input
@@ -338,7 +376,9 @@ export default function AdminCategories() {
                             required
                           />
                         ) : (
-                          <span className="font-bold text-zinc-800 text-sm">{cat.name}</span>
+                          <span className="font-bold text-zinc-800 text-sm">
+                            {cat.name}
+                          </span>
                         )}
                       </td>
 
@@ -374,7 +414,9 @@ export default function AdminCategories() {
                               <Edit2 className="h-4 w-4" />
                             </button>
                             <button
-                              onClick={() => handleDeleteCategory(cat.id, cat.name)}
+                              onClick={() =>
+                                handleDeleteCategory(cat.id, cat.name)
+                              }
                               className="p-1.5 rounded bg-red-500/10 border border-red-500/20 text-red-600 hover:bg-red-500/20 cursor-pointer transition-colors"
                               title="Hapus Kategori"
                             >
@@ -387,6 +429,14 @@ export default function AdminCategories() {
                   ))}
                 </tbody>
               </table>
+
+              <AdminPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                totalItems={categories.length}
+                itemsPerPage={itemsPerPage}
+              />
             </div>
           )}
         </div>

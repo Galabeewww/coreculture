@@ -6,6 +6,7 @@ import { Plus, Edit2, Trash2, X, Upload, Bookmark, Download, FileText } from "lu
 import { formatIDR } from "@/components/ProductCard";
 import Swal from "sweetalert2";
 import { exportToExcel, exportToPDF } from "@/lib/exportUtils";
+import AdminPagination from "@/components/AdminPagination";
 
 /**
  * Halaman CRUD Produk Admin
@@ -22,6 +23,12 @@ export default function AdminProducts() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Pagination state (7 item per halaman)
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 7;
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+  const paginatedProducts = products.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   // State untuk form overlay modal
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -427,7 +434,7 @@ export default function AdminProducts() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-200">
-                {products.map((prod) => {
+                {paginatedProducts.map((prod) => {
                   const catName = categories.find((c) => c.id === prod.categoryId)?.name || "Lainnya";
                   const colName = collections.find((col) => col.id === prod.collectionId)?.name;
 
@@ -499,6 +506,14 @@ export default function AdminProducts() {
                 })}
               </tbody>
             </table>
+
+            <AdminPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              totalItems={products.length}
+              itemsPerPage={itemsPerPage}
+            />
           </div>
         )}
       </div>

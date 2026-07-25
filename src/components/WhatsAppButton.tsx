@@ -1,14 +1,22 @@
 "use client";
 
-import { MessageCircle } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 /**
  * Komponen: Tombol WhatsApp Floating
  *
  * Bulat, warna hijau WhatsApp, fixed di kanan bawah.
  * Klik untuk langsung menghubungi perusahaan via WhatsApp.
+ * Otomatis tersembunyi di seluruh Admin Panel (/admin).
  */
 export default function WhatsAppButton() {
+  const pathname = usePathname();
+
+  // Sembunyikan di seluruh bagian Admin Panel (/admin)
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   const phoneNumber = "6281234567890"; // Ganti dengan nomor WhatsApp perusahaan
   const message = encodeURIComponent(
     "Halo CORECULTURE! Saya tertarik dengan produk streetwear kalian. Boleh info lebih lanjut?"
