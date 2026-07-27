@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { Product, Category, Collection } from "@/types";
-import { Plus, Edit2, Trash2, X, Upload, Bookmark, Download, FileText } from "lucide-react";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  X,
+  Upload,
+  Bookmark,
+  Download,
+  FileText,
+} from "lucide-react";
 import { formatIDR } from "@/components/ProductCard";
 import Swal from "sweetalert2";
 import { exportToExcel, exportToPDF } from "@/lib/exportUtils";
@@ -11,7 +20,7 @@ import AdminPagination from "@/components/AdminPagination";
 /**
  * Halaman CRUD Produk Admin
  * Path: /admin/products
- * 
+ *
  * Diperbarui:
  * - Penanganan independen fetch data API (kategori, koleksi, produk).
  * - Dukungan relasi Koleksi (Collection ID).
@@ -28,7 +37,10 @@ export default function AdminProducts() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 7;
   const totalPages = Math.ceil(products.length / itemsPerPage);
-  const paginatedProducts = products.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const paginatedProducts = products.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
 
   // State untuk form overlay modal
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -49,9 +61,17 @@ export default function AdminProducts() {
   const [uploadingFront, setUploadingFront] = useState(false);
   const [uploadingBack, setUploadingBack] = useState(false);
 
-  const SIZE_OPTIONS = ["S", "M", "L", "XL", "28", "30", "32", "34", "All Size"];
-
-
+  const SIZE_OPTIONS = [
+    "S",
+    "M",
+    "L",
+    "XL",
+    "28",
+    "30",
+    "32",
+    "34",
+    "All Size",
+  ];
 
   // Konversi berkas unggahan ke Base64
   const processFile = (file: File): Promise<string> => {
@@ -75,7 +95,11 @@ export default function AdminProducts() {
       setImageFront(base64);
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Gagal!", text: "Gagal memproses berkas gambar depan." });
+      Swal.fire({
+        icon: "error",
+        title: "Gagal!",
+        text: "Gagal memproses berkas gambar depan.",
+      });
     } finally {
       setUploadingFront(false);
     }
@@ -91,7 +115,11 @@ export default function AdminProducts() {
       setImageBack(base64);
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Gagal!", text: "Gagal memproses berkas gambar belakang." });
+      Swal.fire({
+        icon: "error",
+        title: "Gagal!",
+        text: "Gagal memproses berkas gambar belakang.",
+      });
     } finally {
       setUploadingBack(false);
     }
@@ -103,7 +131,7 @@ export default function AdminProducts() {
       const [resProd, resCat, resCol] = await Promise.all([
         fetch("/api/products").catch(() => null),
         fetch("/api/categories").catch(() => null),
-        fetch("/api/collections").catch(() => null)
+        fetch("/api/collections").catch(() => null),
       ]);
 
       if (resProd && resProd.ok) {
@@ -114,7 +142,8 @@ export default function AdminProducts() {
         const catData = await resCat.json();
         if (Array.isArray(catData)) {
           setCategories(catData);
-          if (catData.length > 0) setCategoryId((prev) => prev || catData[0].id);
+          if (catData.length > 0)
+            setCategoryId((prev) => prev || catData[0].id);
         }
       }
       if (resCol && resCol.ok) {
@@ -176,7 +205,7 @@ export default function AdminProducts() {
         icon: "warning",
         title: "Form Belum Lengkap",
         text: "Silakan lengkapi nama produk, kategori, dan gambar depan wajib!",
-        confirmButtonColor: "#002D72"
+        confirmButtonColor: "#002D72",
       });
       return;
     }
@@ -190,7 +219,7 @@ export default function AdminProducts() {
       imageBack: imageBack.trim(),
       sizes: selectedSizes.length > 0 ? selectedSizes : ["All Size"],
       categoryId,
-      collectionId: collectionId || null
+      collectionId: collectionId || null,
     };
 
     try {
@@ -203,17 +232,23 @@ export default function AdminProducts() {
 
         const data = await res.json();
         if (res.ok) {
-          setProducts(products.map((p) => (p.id === editingProduct.id ? data : p)));
+          setProducts(
+            products.map((p) => (p.id === editingProduct.id ? data : p)),
+          );
           setIsFormOpen(false);
           Swal.fire({
             icon: "success",
             title: "Diperbarui!",
             text: "Produk berhasil diperbarui.",
             timer: 2000,
-            showConfirmButton: false
+            showConfirmButton: false,
           });
         } else {
-          Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal memperbarui produk." });
+          Swal.fire({
+            icon: "error",
+            title: "Gagal!",
+            text: data.error || "Gagal memperbarui produk.",
+          });
         }
       } else {
         const res = await fetch("/api/products", {
@@ -231,15 +266,23 @@ export default function AdminProducts() {
             title: "Berhasil!",
             text: `Produk "${data.name}" berhasil ditambahkan!`,
             timer: 2000,
-            showConfirmButton: false
+            showConfirmButton: false,
           });
         } else {
-          Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal menambahkan produk." });
+          Swal.fire({
+            icon: "error",
+            title: "Gagal!",
+            text: data.error || "Gagal menambahkan produk.",
+          });
         }
       }
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Kesalahan!", text: "Koneksi ke API gagal." });
+      Swal.fire({
+        icon: "error",
+        title: "Kesalahan!",
+        text: "Koneksi ke API gagal.",
+      });
     }
   };
 
@@ -254,7 +297,7 @@ export default function AdminProducts() {
       confirmButtonText: "Ya, Hapus!",
       cancelButtonText: "Batal",
       background: "#ffffff",
-      color: "#18181b"
+      color: "#18181b",
     });
 
     if (!result.isConfirmed) return;
@@ -269,15 +312,23 @@ export default function AdminProducts() {
           title: "Dihapus!",
           text: `Produk "${prodName}" telah dihapus.`,
           timer: 2000,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
       } else {
         const data = await res.json();
-        Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal menghapus produk." });
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: data.error || "Gagal menghapus produk.",
+        });
       }
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Kesalahan!", text: "Koneksi ke server gagal." });
+      Swal.fire({
+        icon: "error",
+        title: "Kesalahan!",
+        text: "Koneksi ke server gagal.",
+      });
     }
   };
 
@@ -308,18 +359,27 @@ export default function AdminProducts() {
         });
       } else {
         const data = await res.json();
-        Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal menghapus semua produk." });
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: data.error || "Gagal menghapus semua produk.",
+        });
       }
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Kesalahan!", text: "Koneksi server gagal." });
+      Swal.fire({
+        icon: "error",
+        title: "Kesalahan!",
+        text: "Koneksi server gagal.",
+      });
     }
   };
 
   const handleExportExcel = () => {
     const formattedData = products.map((p) => ({
       name: p.name,
-      category: categories.find((c) => c.id === p.categoryId)?.name || p.categoryId,
+      category:
+        categories.find((c) => c.id === p.categoryId)?.name || p.categoryId,
       collection: collections.find((c) => c.id === p.collectionId)?.name || "-",
       price: formatIDR(p.price),
       stock: p.stock,
@@ -336,14 +396,15 @@ export default function AdminProducts() {
         { key: "stock", label: "Stok Usaha" },
         { key: "sizes", label: "Varian Ukuran" },
       ],
-      formattedData
+      formattedData,
     );
   };
 
   const handleExportPDF = () => {
     const formattedData = products.map((p) => ({
       name: p.name,
-      category: categories.find((c) => c.id === p.categoryId)?.name || p.categoryId,
+      category:
+        categories.find((c) => c.id === p.categoryId)?.name || p.categoryId,
       collection: collections.find((c) => c.id === p.collectionId)?.name || "-",
       price: formatIDR(p.price),
       stock: p.stock,
@@ -361,18 +422,21 @@ export default function AdminProducts() {
         { key: "stock", label: "Stok" },
         { key: "sizes", label: "Ukuran" },
       ],
-      formattedData
+      formattedData,
     );
   };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-200 pb-5">
         <div>
-          <h2 className="text-2xl font-black text-zinc-900 tracking-wider uppercase">MANAGE PRODUCTS</h2>
-          <p className="text-xs text-zinc-500 mt-1 uppercase">Pengelolaan katalog pakaian, aksesoris, dan koleksi</p>
+          <h2 className="text-2xl font-black text-zinc-900 tracking-wider uppercase">
+            MANAGE PRODUCTS
+          </h2>
+          <p className="text-xs text-zinc-500 mt-1 uppercase">
+            Pengelolaan katalog pakaian, aksesoris, dan koleksi
+          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -380,13 +444,14 @@ export default function AdminProducts() {
             onClick={handleExportExcel}
             className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
           >
-            <Download size={14} /> Export Excel (.csv)
+            <Download size={14} /> Excel (.csv)
           </button>
           <button
             onClick={handleExportPDF}
-            className="px-3.5 py-2 bg-[#002D72] hover:bg-[#001D4A] text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
+            className="px-3.5 py-2 bg-[#c90000] hover:bg-[#a10202] text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
           >
-            <FileText size={14} /> Export PDF Report
+            <FileText size={14} />
+            PDF
           </button>
           {products.length > 0 && (
             <button
@@ -408,7 +473,9 @@ export default function AdminProducts() {
       {/* Tabel Produk */}
       <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden shadow-sm">
         <div className="px-6 py-5 border-b border-zinc-200 bg-zinc-50/50">
-          <h3 className="text-xs font-black text-zinc-800 tracking-widest uppercase">DAFTAR KATALOG</h3>
+          <h3 className="text-xs font-black text-zinc-800 tracking-widest uppercase">
+            DAFTAR KATALOG
+          </h3>
         </div>
 
         {loading ? (
@@ -417,7 +484,8 @@ export default function AdminProducts() {
           </div>
         ) : products.length === 0 ? (
           <div className="py-20 text-center text-xs text-zinc-500 uppercase tracking-widest">
-            Belum ada produk terdaftar. Klik "+ Tambah Produk Baru" untuk memulai.
+            Belum ada produk terdaftar. Klik "+ Tambah Produk Baru" untuk
+            memulai.
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -435,16 +503,29 @@ export default function AdminProducts() {
               </thead>
               <tbody className="divide-y divide-zinc-200">
                 {paginatedProducts.map((prod) => {
-                  const catName = categories.find((c) => c.id === prod.categoryId)?.name || "Lainnya";
-                  const colName = collections.find((col) => col.id === prod.collectionId)?.name;
+                  const catName =
+                    categories.find((c) => c.id === prod.categoryId)?.name ||
+                    "Lainnya";
+                  const colName = collections.find(
+                    (col) => col.id === prod.collectionId,
+                  )?.name;
 
                   return (
-                    <tr key={prod.id} className="hover:bg-zinc-50 transition-colors">
+                    <tr
+                      key={prod.id}
+                      className="hover:bg-zinc-50 transition-colors"
+                    >
                       <td className="px-6 py-4 flex items-center gap-3">
                         <div className="h-12 w-9 rounded overflow-hidden bg-zinc-100 shrink-0 border border-zinc-200">
-                          <img src={prod.imageFront} alt={prod.name} className="h-full w-full object-cover" />
+                          <img
+                            src={prod.imageFront}
+                            alt={prod.name}
+                            className="h-full w-full object-cover"
+                          />
                         </div>
-                        <span className="font-bold text-zinc-900 text-sm">{prod.name}</span>
+                        <span className="font-bold text-zinc-900 text-sm">
+                          {prod.name}
+                        </span>
                       </td>
 
                       <td className="px-6 py-4 text-zinc-500 font-bold uppercase text-[10px] tracking-wide">
@@ -457,7 +538,9 @@ export default function AdminProducts() {
                             <Bookmark className="h-3 w-3" /> {colName}
                           </span>
                         ) : (
-                          <span className="text-zinc-400 text-[10px] font-mono">-</span>
+                          <span className="text-zinc-400 text-[10px] font-mono">
+                            -
+                          </span>
                         )}
                       </td>
 
@@ -467,16 +550,23 @@ export default function AdminProducts() {
 
                       <td className="px-6 py-4">
                         {prod.stock === 0 ? (
-                          <span className="text-red-500 font-black uppercase tracking-wider text-[10px]">SOLD OUT</span>
+                          <span className="text-red-500 font-black uppercase tracking-wider text-[10px]">
+                            SOLD OUT
+                          </span>
                         ) : (
-                          <span className="text-zinc-700 font-bold">{prod.stock} Pcs</span>
+                          <span className="text-zinc-700 font-bold">
+                            {prod.stock} Pcs
+                          </span>
                         )}
                       </td>
 
                       <td className="px-6 py-4">
                         <div className="flex flex-wrap gap-1 max-w-[150px]">
                           {prod.sizes.map((s) => (
-                            <span key={s} className="bg-zinc-100 border border-zinc-200 text-[9px] px-1.5 py-0.5 rounded text-zinc-500 font-black">
+                            <span
+                              key={s}
+                              className="bg-zinc-100 border border-zinc-200 text-[9px] px-1.5 py-0.5 rounded text-zinc-500 font-black"
+                            >
                               {s}
                             </span>
                           ))}
@@ -493,7 +583,9 @@ export default function AdminProducts() {
                             <Edit2 className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => handleDeleteProduct(prod.id, prod.name)}
+                            onClick={() =>
+                              handleDeleteProduct(prod.id, prod.name)
+                            }
                             className="p-1.5 rounded bg-red-500/10 border border-red-500/20 text-red-600 hover:bg-red-500/20 cursor-pointer transition-colors"
                             title="Hapus Produk"
                           >
@@ -517,14 +609,12 @@ export default function AdminProducts() {
           </div>
         )}
       </div>
-
       {/* ==============================================
           MODAL OVERLAY: FORM TAMBAH / EDIT PRODUK
           ============================================== */}
       {isFormOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/80 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="relative w-full max-w-2xl bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col text-zinc-800">
-            
             <div className="px-6 py-4 border-b border-zinc-200 flex justify-between items-center bg-zinc-50">
               <h3 className="text-xs font-black text-zinc-800 tracking-widest uppercase">
                 {editingProduct ? "EDIT PRODUK KATALOG" : "TAMBAH PRODUK BARU"}
@@ -537,11 +627,15 @@ export default function AdminProducts() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-6 flex-grow">
-              
+            <form
+              onSubmit={handleSubmit}
+              className="p-6 overflow-y-auto space-y-6 flex-grow"
+            >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase">Nama Produk *</label>
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase">
+                    Nama Produk *
+                  </label>
                   <input
                     type="text"
                     required
@@ -553,7 +647,9 @@ export default function AdminProducts() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase">Kategori Produk *</label>
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase">
+                    Kategori Produk *
+                  </label>
                   <select
                     value={categoryId}
                     onChange={(e) => setCategoryId(e.target.value)}
@@ -561,17 +657,23 @@ export default function AdminProducts() {
                     required
                   >
                     {categories.length === 0 ? (
-                      <option disabled value="">Buat kategori terlebih dahulu</option>
+                      <option disabled value="">
+                        Buat kategori terlebih dahulu
+                      </option>
                     ) : (
                       categories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </option>
                       ))
                     )}
                   </select>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase">Koleksi (Opsional)</label>
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase">
+                    Koleksi (Opsional)
+                  </label>
                   <select
                     value={collectionId}
                     onChange={(e) => setCollectionId(e.target.value)}
@@ -579,13 +681,17 @@ export default function AdminProducts() {
                   >
                     <option value="">Tanpa Koleksi</option>
                     {collections.map((col) => (
-                      <option key={col.id} value={col.id}>{col.name}</option>
+                      <option key={col.id} value={col.id}>
+                        {col.name}
+                      </option>
                     ))}
                   </select>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase">Harga Produk (Rupiah) *</label>
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase">
+                    Harga Produk (Rupiah) *
+                  </label>
                   <input
                     type="number"
                     min="1000"
@@ -597,7 +703,9 @@ export default function AdminProducts() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase">Jumlah Stok *</label>
+                  <label className="text-[10px] font-bold text-zinc-500 uppercase">
+                    Jumlah Stok *
+                  </label>
                   <input
                     type="number"
                     min="0"
@@ -610,7 +718,9 @@ export default function AdminProducts() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-zinc-500 uppercase">Deskripsi Produk</label>
+                <label className="text-[10px] font-bold text-zinc-500 uppercase">
+                  Deskripsi Produk
+                </label>
                 <textarea
                   rows={3}
                   value={description}
@@ -622,20 +732,32 @@ export default function AdminProducts() {
 
               {/* SECTION: INPUT GAMBAR DENGAN UPLOAD FILE */}
               <div className="space-y-4 border-t border-zinc-100 pt-4">
-                <h4 className="text-xs font-black text-zinc-800 uppercase tracking-wider">GAMBAR PRODUK (UNGGAH FOTO)</h4>
-                
+                <h4 className="text-xs font-black text-zinc-800 uppercase tracking-wider">
+                  GAMBAR PRODUK (UNGGAH FOTO)
+                </h4>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {/* Unggah Gambar Depan */}
                   <div className="space-y-2.5">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase">1. Foto Bagian Depan *</label>
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase">
+                      1. Foto Bagian Depan *
+                    </label>
                     <div className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-200 rounded-lg p-4 bg-zinc-50 relative aspect-[4/5] overflow-hidden group">
                       {imageFront ? (
                         <>
-                          <img src={imageFront} alt="Preview Depan" className="w-full h-full object-cover absolute inset-0 z-0" />
+                          <img
+                            src={imageFront}
+                            alt="Preview Depan"
+                            className="w-full h-full object-cover absolute inset-0 z-0"
+                          />
                           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20">
                             <button
                               type="button"
-                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setImageFront(""); }}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setImageFront("");
+                              }}
                               className="text-white text-[10px] font-bold uppercase tracking-wider bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded cursor-pointer flex items-center gap-1.5 shadow-md transition-colors z-30"
                               title="Hapus Gambar Depan"
                             >
@@ -646,8 +768,12 @@ export default function AdminProducts() {
                       ) : (
                         <div className="text-center space-y-2 z-10">
                           <Upload className="h-6 w-6 text-zinc-400 mx-auto" />
-                          <span className="text-[10px] text-zinc-500 font-medium block">Pilih berkas foto depan</span>
-                          <span className="text-[9px] text-zinc-400 block">(Max 5MB, format JPG/PNG)</span>
+                          <span className="text-[10px] text-zinc-500 font-medium block">
+                            Pilih berkas foto depan
+                          </span>
+                          <span className="text-[9px] text-zinc-400 block">
+                            (Max 5MB, format JPG/PNG)
+                          </span>
                         </div>
                       )}
                       <input
@@ -658,20 +784,34 @@ export default function AdminProducts() {
                         title="Unggah Foto Depan"
                       />
                     </div>
-                    {uploadingFront && <p className="text-[10px] text-primary font-bold animate-pulse text-center">Memproses file...</p>}
+                    {uploadingFront && (
+                      <p className="text-[10px] text-primary font-bold animate-pulse text-center">
+                        Memproses file...
+                      </p>
+                    )}
                   </div>
 
                   {/* Unggah Gambar Belakang */}
                   <div className="space-y-2.5">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase">2. Foto Bagian Belakang (Opsional)</label>
+                    <label className="text-[10px] font-bold text-zinc-500 uppercase">
+                      2. Foto Bagian Belakang (Opsional)
+                    </label>
                     <div className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-200 rounded-lg p-4 bg-zinc-50 relative aspect-[4/5] overflow-hidden group">
                       {imageBack ? (
                         <>
-                          <img src={imageBack} alt="Preview Belakang" className="w-full h-full object-cover absolute inset-0 z-0" />
+                          <img
+                            src={imageBack}
+                            alt="Preview Belakang"
+                            className="w-full h-full object-cover absolute inset-0 z-0"
+                          />
                           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20">
                             <button
                               type="button"
-                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setImageBack(""); }}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setImageBack("");
+                              }}
                               className="text-white text-[10px] font-bold uppercase tracking-wider bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded cursor-pointer flex items-center gap-1.5 shadow-md transition-colors z-30"
                               title="Hapus Gambar Belakang"
                             >
@@ -682,8 +822,12 @@ export default function AdminProducts() {
                       ) : (
                         <div className="text-center space-y-2 z-10">
                           <Upload className="h-6 w-6 text-zinc-400 mx-auto" />
-                          <span className="text-[10px] text-zinc-500 font-medium block">Pilih berkas foto belakang</span>
-                          <span className="text-[9px] text-zinc-400 block">(Max 5MB, format JPG/PNG)</span>
+                          <span className="text-[10px] text-zinc-500 font-medium block">
+                            Pilih berkas foto belakang
+                          </span>
+                          <span className="text-[9px] text-zinc-400 block">
+                            (Max 5MB, format JPG/PNG)
+                          </span>
                         </div>
                       )}
                       <input
@@ -694,19 +838,26 @@ export default function AdminProducts() {
                         title="Unggah Foto Belakang"
                       />
                     </div>
-                    {uploadingBack && <p className="text-[10px] text-primary font-bold animate-pulse text-center">Memproses file...</p>}
+                    {uploadingBack && (
+                      <p className="text-[10px] text-primary font-bold animate-pulse text-center">
+                        Memproses file...
+                      </p>
+                    )}
                   </div>
                 </div>
-
-
               </div>
 
               {/* Varian Ukuran */}
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-zinc-500 uppercase">Varian Ukuran *</label>
+                <label className="text-[10px] font-bold text-zinc-500 uppercase">
+                  Varian Ukuran *
+                </label>
                 <div className="flex flex-wrap gap-3 p-3 bg-zinc-50 border border-zinc-200 rounded">
                   {SIZE_OPTIONS.map((size) => (
-                    <label key={size} className="flex items-center gap-1.5 text-xs text-zinc-700 cursor-pointer">
+                    <label
+                      key={size}
+                      className="flex items-center gap-1.5 text-xs text-zinc-700 cursor-pointer"
+                    >
                       <input
                         type="checkbox"
                         checked={selectedSizes.includes(size)}
@@ -735,12 +886,10 @@ export default function AdminProducts() {
                   SIMPAN
                 </button>
               </div>
-
             </form>
           </div>
         </div>
       )}
-
     </div>
   );
 }

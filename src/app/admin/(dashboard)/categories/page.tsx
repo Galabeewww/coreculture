@@ -27,7 +27,10 @@ export default function AdminCategories() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 7;
   const totalPages = Math.ceil(categories.length / itemsPerPage);
-  const paginatedCategories = categories.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const paginatedCategories = categories.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
 
   const [newCatName, setNewCatName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -279,13 +282,13 @@ export default function AdminCategories() {
             onClick={handleExportExcel}
             className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
           >
-            <Download size={14} /> Export Excel (.csv)
+            <Download size={14} /> Excel (.csv)
           </button>
           <button
             onClick={handleExportPDF}
-            className="px-3.5 py-2 bg-[#002D72] hover:bg-[#001D4A] text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
+            className="px-3.5 py-2 bg-[#c90000] hover:bg-[#a10202] text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
           >
-            <FileText size={14} /> Export PDF Report
+            <FileText size={14} /> PDF
           </button>
           {categories.length > 0 && (
             <button

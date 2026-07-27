@@ -30,7 +30,10 @@ export default function AdminCollectionsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 7;
   const totalPages = Math.ceil(collections.length / itemsPerPage);
-  const paginatedCollections = collections.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const paginatedCollections = collections.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
 
   // State Form Tambah
   const [name, setName] = useState("");
@@ -250,11 +253,19 @@ export default function AdminCollectionsPage() {
         });
       } else {
         const data = await res.json();
-        Swal.fire({ icon: "error", title: "Gagal!", text: data.error || "Gagal menghapus semua koleksi." });
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: data.error || "Gagal menghapus semua koleksi.",
+        });
       }
     } catch (err) {
       console.error(err);
-      Swal.fire({ icon: "error", title: "Kesalahan!", text: "Gagal menghapus semua koleksi." });
+      Swal.fire({
+        icon: "error",
+        title: "Kesalahan!",
+        text: "Gagal menghapus semua koleksi.",
+      });
     }
   };
 
@@ -266,7 +277,7 @@ export default function AdminCollectionsPage() {
         { key: "slug", label: "Slug" },
         { key: "description", label: "Deskripsi" },
       ],
-      collections
+      collections,
     );
   };
 
@@ -279,7 +290,7 @@ export default function AdminCollectionsPage() {
         { key: "slug", label: "Slug URL" },
         { key: "description", label: "Deskripsi" },
       ],
-      collections
+      collections,
     );
   };
 
@@ -289,10 +300,12 @@ export default function AdminCollectionsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 pb-5">
         <div>
           <h1 className="text-xl font-black text-zinc-900 tracking-wider uppercase flex items-center gap-2">
-            <Bookmark className="h-5 w-5 text-primary" /> Kelola Koleksi Eksklusif
+            <Bookmark className="h-5 w-5 text-primary" /> Kelola Koleksi
+            Eksklusif
           </h1>
           <p className="text-xs text-zinc-500 mt-1">
-            Tambah, edit, dan hapus koleksi produk (misal: Edisi Kolaborasi Croire, Summer 2026, dll)
+            Tambah, edit, dan hapus koleksi produk (misal: Edisi Kolaborasi
+            Croire, Summer 2026, dll)
           </p>
         </div>
 
@@ -302,19 +315,22 @@ export default function AdminCollectionsPage() {
             onClick={fetchData}
             className="px-3 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
+            <RefreshCw
+              className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`}
+            />{" "}
+            Refresh
           </button>
           <button
             onClick={handleExportExcel}
             className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
           >
-            <Download size={14} /> Export Excel (.csv)
+            <Download size={14} /> Excel (.csv)
           </button>
           <button
             onClick={handleExportPDF}
-            className="px-3 py-2 bg-[#002D72] hover:bg-[#001D4A] text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
+            className="px-3 py-2 bg-[#c90000] hover:bg-[#a10202] text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
           >
-            <FileText size={14} /> Export PDF Report
+            <FileText size={14} /> PDF
           </button>
           {collections.length > 0 && (
             <button
