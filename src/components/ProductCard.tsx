@@ -2,10 +2,11 @@
 
 import { Product } from "@/types";
 import { ArrowRight, Flame } from "lucide-react";
+import Link from "next/link";
 
 interface ProductCardProps {
   product: Product;
-  onOpenDetails: (product: Product) => void;
+  onOpenDetails?: (product: Product) => void;
 }
 
 // Helper untuk format mata uang Rupiah
@@ -23,9 +24,7 @@ export function formatIDR(price: number): string {
  *
  * Fitur:
  * - Siluet streetwear dengan aspek rasio gambar portrait 3:4.
- * - Efek hover transisi premium: otomatis berganti dari gambar depan (imageFront)
- *   ke gambar belakang (imageBack) dengan animasi halus!
- * - Label stok menipis dan indicator sizes standar streetwear.
+ * - Navigasi langsung ke /product/[id] untuk tampilan View Detail inline (non-popup).
  */
 export default function ProductCard({
   product,
@@ -36,16 +35,16 @@ export default function ProductCard({
 
   const hasBackImage = Boolean(
     product.imageBack &&
-    product.imageBack.trim() !== "" &&
-    product.imageBack.trim() !== product.imageFront.trim()
+      product.imageBack.trim() !== "" &&
+      product.imageBack.trim() !== product.imageFront.trim()
   );
 
   return (
-    <div
-      onClick={() => onOpenDetails(product)}
+    <Link
+      href={`/product/${product.id}`}
       className="group relative cursor-pointer flex flex-col bg-white border border-zinc-200 overflow-hidden hover:border-zinc-400 transition-all duration-300 rounded-lg shadow-sm hover-lift"
     >
-      {/* Container Gambar (Posisi Relatif & Overlapping Grid) */}
+      {/* Container Gambar */}
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-zinc-100">
         {/* Gambar Depan (Utama) */}
         <img
@@ -116,6 +115,6 @@ export default function ProductCard({
           ))}
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

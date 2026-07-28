@@ -560,6 +560,13 @@ export default function AdminPhotoshoots() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setIsCreatingEdition(!isCreatingEdition)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#002D72] hover:bg-[#001D4A] text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 shadow-sm cursor-pointer"
+          >
+            <Plus size={16} />
+            {isCreatingEdition ? "Batal" : "Buat Edisi Baru (misal Vol.3)"}
+          </button>
           {editions.length > 0 && (
             <button
               onClick={handleDeleteAllEditions}
@@ -568,13 +575,6 @@ export default function AdminPhotoshoots() {
               <Trash2 size={16} /> HAPUS SEMUA EDISI
             </button>
           )}
-          <button
-            onClick={() => setIsCreatingEdition(!isCreatingEdition)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#002D72] hover:bg-[#001D4A] text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 shadow-sm cursor-pointer"
-          >
-            <Plus size={16} />
-            {isCreatingEdition ? "Batal" : "Buat Edisi Baru (misal Vol.3)"}
-          </button>
         </div>
       </div>
 

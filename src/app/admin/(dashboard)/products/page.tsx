@@ -453,6 +453,12 @@ export default function AdminProducts() {
             <FileText size={14} />
             PDF
           </button>
+          <button
+            onClick={openAddForm}
+            className="flex items-center gap-2 bg-primary text-white font-black text-xs px-4 py-2.5 rounded-lg cursor-pointer shadow-md hover:bg-primary-hover transition-colors uppercase"
+          >
+            <Plus className="h-4 w-4" /> TAMBAH PRODUK BARU
+          </button>
           {products.length > 0 && (
             <button
               onClick={handleDeleteAllProducts}
@@ -461,12 +467,6 @@ export default function AdminProducts() {
               <Trash2 size={14} /> HAPUS SEMUA PRODUK
             </button>
           )}
-          <button
-            onClick={openAddForm}
-            className="flex items-center gap-2 bg-primary text-white font-black text-xs px-4 py-2.5 rounded-lg cursor-pointer shadow-md hover:bg-primary-hover transition-colors uppercase"
-          >
-            <Plus className="h-4 w-4" /> TAMBAH PRODUK BARU
-          </button>
         </div>
       </div>
 
