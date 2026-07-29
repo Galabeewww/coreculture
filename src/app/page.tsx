@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import DetailModal from "@/components/DetailModal";
 import PhotoshootSlideshow from "@/components/PhotoshootSlideshow";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { Category, Product } from "@/types";
@@ -424,18 +423,6 @@ export default function Home() {
 
       {/* 3. CORECULTURE MODEL PHOTOSHOOT SLIDESHOW */}
       <PhotoshootSlideshow />
-
-      {/* MODAL DETAIL */}
-      {selectedProduct && (
-        <DetailModal
-          product={selectedProduct}
-          categoryName={getCategoryName(selectedProduct.categoryId)}
-          onClose={() => setSelectedProduct(null)}
-        />
-      )}
-
-      {/* WhatsApp Floating Button */}
-      {/* <WhatsAppButton /> */}
 
       <Footer />
     </div>

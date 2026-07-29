@@ -10,19 +10,17 @@ import {
   X,
   ChevronDown,
   ShieldCheck,
-  ShoppingBag,
   ArrowRight,
 } from "lucide-react";
 import { Category, Collection, Product } from "@/types";
 import { useRouter } from "next/navigation";
 import { formatIDR } from "./ProductCard";
-import DetailModal from "./DetailModal";
 
 /**
  * Komponen: Navbar Publik
  *
  * Fitur:
- * - Pencarian Langsung Real-Time (Search Modal Overlay).
+ * - Pencarian Langsung Real-Time (Search Modal Overlay yang mengarahkan langsung ke halaman /product/[id]).
  * - SHOP & COLLECTIONS dropdown.
  * - Sesi Admin login & indikator status.
  */
@@ -45,10 +43,9 @@ export default function Navbar() {
   const [collectionsOpen, setCollectionsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-  // State Fitur Search Modal & Modal Detail Produk
+  // State Fitur Search Modal
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   // Ref untuk deteksi klik di luar dropdown & input search
   const shopRef = useRef<HTMLDivElement>(null);
@@ -141,7 +138,8 @@ export default function Navbar() {
     if (!searchQuery.trim()) return false;
     const query = searchQuery.toLowerCase();
     const catName = categories.find((c) => c.id === p.categoryId)?.name || "";
-    const colName = collections.find((c) => c.id === p.collectionId)?.name || "";
+    const colName =
+      collections.find((c) => c.id === p.collectionId)?.name || "";
     return (
       p.name.toLowerCase().includes(query) ||
       (p.description && p.description.toLowerCase().includes(query)) ||
@@ -326,7 +324,9 @@ export default function Navbar() {
                 title="Pencarian Langsung"
               >
                 <Search className="h-4 w-4" />
-                <span className="text-[11px] font-medium pr-2">Cari produk...</span>
+                <span className="text-[11px] font-medium pr-2">
+                  Cari produk...
+                </span>
               </button>
 
               {/* User Icon & Admin Dropdown */}
@@ -393,7 +393,11 @@ export default function Navbar() {
                 onClick={() => setIsOpen(!isOpen)}
                 className="inline-flex items-center justify-center rounded-md p-2 text-zinc-500 hover:bg-zinc-100 hover:text-primary focus:outline-none transition-colors"
               >
-                {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                {isOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
               </button>
             </div>
           </div>
@@ -562,7 +566,8 @@ export default function Navbar() {
               ) : (
                 <>
                   {/* Kategori & Koleksi Cocok */}
-                  {(filteredCategories.length > 0 || filteredCollections.length > 0) && (
+                  {(filteredCategories.length > 0 ||
+                    filteredCollections.length > 0) && (
                     <div className="space-y-2 pb-4 border-b border-zinc-100">
                       <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
                         Kategori & Koleksi Terkait
@@ -575,7 +580,8 @@ export default function Navbar() {
                             onClick={() => setIsSearchOpen(false)}
                             className="px-3 py-1.5 bg-primary/10 border border-primary/20 text-primary text-xs font-bold rounded-lg hover:bg-primary hover:text-white transition-colors flex items-center gap-1.5"
                           >
-                            Kategori: {cat.name} <ArrowRight className="w-3 h-3" />
+                            Kategori: {cat.name}{" "}
+                            <ArrowRight className="w-3 h-3" />
                           </Link>
                         ))}
                         {filteredCollections.map((col) => (
@@ -585,14 +591,15 @@ export default function Navbar() {
                             onClick={() => setIsSearchOpen(false)}
                             className="px-3 py-1.5 bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold rounded-lg hover:bg-blue-800 hover:text-white transition-colors flex items-center gap-1.5"
                           >
-                            Koleksi: {col.name} <ArrowRight className="w-3 h-3" />
+                            Koleksi: {col.name}{" "}
+                            <ArrowRight className="w-3 h-3" />
                           </Link>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {/* Hasil Produk */}
+                  {/* Hasil Produk - Langsung mengarahkan ke /product/[id] (ProductDetailView) */}
                   <div>
                     <div className="flex items-center justify-between pb-3">
                       <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
@@ -602,22 +609,21 @@ export default function Navbar() {
 
                     {filteredProducts.length === 0 ? (
                       <div className="py-12 text-center text-xs text-zinc-500 font-semibold italic">
-                        Tidak ada produk yang cocok dengan kata kunci &quot;{searchQuery}&quot;.
+                        Tidak ada produk yang cocok dengan kata kunci &quot;
+                        {searchQuery}&quot;.
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {filteredProducts.map((prod) => {
                           const catName =
-                            categories.find((c) => c.id === prod.categoryId)?.name ||
-                            "Katalog";
+                            categories.find((c) => c.id === prod.categoryId)
+                              ?.name || "Katalog";
 
                           return (
-                            <div
+                            <Link
                               key={prod.id}
-                              onClick={() => {
-                                setIsSearchOpen(false);
-                                setSelectedProduct(prod);
-                              }}
+                              href={`/product/${prod.id}`}
+                              onClick={() => setIsSearchOpen(false)}
                               className="flex items-center gap-3 p-2.5 rounded-xl border border-zinc-200 hover:border-primary hover:shadow-md transition-all cursor-pointer group bg-zinc-50/50 hover:bg-white"
                             >
                               <div className="w-14 h-16 rounded-lg overflow-hidden bg-zinc-100 shrink-0 border border-zinc-200">
@@ -650,7 +656,7 @@ export default function Navbar() {
                                   )}
                                 </div>
                               </div>
-                            </div>
+                            </Link>
                           );
                         })}
                       </div>
@@ -661,18 +667,6 @@ export default function Navbar() {
             </div>
           </div>
         </div>
-      )}
-
-      {/* Modal Detail Produk saat diklik dari hasil pencarian */}
-      {selectedProduct && (
-        <DetailModal
-          product={selectedProduct}
-          categoryName={
-            categories.find((c) => c.id === selectedProduct.categoryId)?.name ||
-            "Katalog"
-          }
-          onClose={() => setSelectedProduct(null)}
-        />
       )}
     </>
   );

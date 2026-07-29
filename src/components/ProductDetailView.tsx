@@ -12,7 +12,6 @@ import {
 import { useState } from "react";
 import { formatIDR } from "./ProductCard";
 import Swal from "sweetalert2";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 interface ProductDetailViewProps {
@@ -31,7 +30,7 @@ interface ProductDetailViewProps {
  *   - Harga IDR
  *   - Pilihan Ukuran (Tombol Lingkaran S, M, L, XL)
  *   - Pengatur Jumlah ([ - ] [ 1 ] [ + ])
- *   - Tombol "Add to Bag" (Abu-abu lembut) & "Buy Now" (Hijau cerah)
+ *   - Tombol "Add to Bag" (Pesan Fitur Dalam Pengembangan) & "Buy Now" (Hijau cerah)
  */
 export default function ProductDetailView({
   product,
@@ -69,6 +68,7 @@ export default function ProductDetailView({
     });
   };
 
+  // Pesan pemberitahuan fitur Add to Bag masih dalam tahap pengembangan
   const handleAddToBag = () => {
     if (isOutOfStock) return;
     if (!selectedSize && product.sizes.length > 0) {
@@ -81,10 +81,11 @@ export default function ProductDetailView({
       return;
     }
     Swal.fire({
-      icon: "success",
-      title: "Berhasil Ditambahkan!",
-      text: `${product.name} (Ukuran: ${selectedSize}, Qty: ${quantity}) ditambahkan ke tas belanja!`,
+      icon: "info",
+      title: "Fitur Dalam Pengembangan 🚧",
+      text: "Fitur Add to Bag sedang dalam tahap pengembangan. Silakan hubungi kami via WhatsApp untuk pemesanan langsung!",
       confirmButtonColor: "#002D72",
+      confirmButtonText: "Mengerti",
     });
   };
 
@@ -165,7 +166,7 @@ export default function ProductDetailView({
             </span>
             <br />
             {/* Nama Produk dengan garis bawah biru bergaya referensi */}
-            <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 tracking-tight  pb-1 border-b-2 border-primary inline-block">
+            <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 tracking-tight pb-1 border-b-2 border-primary inline-block">
               {product.name}
             </h1>
           </div>
@@ -258,7 +259,7 @@ export default function ProductDetailView({
               Add to Bag
             </button>
 
-            {/* Tombol Buy Now (Hijau cerah khas referensi) */}
+            {/* Tombol Buy Now (Hijau cerah) */}
             <button
               onClick={handleBuyNow}
               disabled={isOutOfStock}

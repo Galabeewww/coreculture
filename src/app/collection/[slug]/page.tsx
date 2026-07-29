@@ -5,7 +5,6 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import DetailModal from "@/components/DetailModal";
 import { Collection, Product, Category } from "@/types";
 import { Search, X, ChevronRight, Bookmark } from "lucide-react";
 
@@ -24,7 +23,6 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,78 +59,101 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
         p.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-  const getCategoryName = (categoryId: string) =>
-    categories.find((c) => c.id === categoryId)?.name || "Fashion";
-
   return (
-    <div className="flex flex-col min-h-screen bg-white text-zinc-950">
+    <div className="min-h-screen flex flex-col bg-white text-zinc-900 selection:bg-primary selection:text-white">
       <Navbar />
 
-      {/* Header Koleksi */}
-      {collection && (
-        <header className="w-full py-16 bg-primary text-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 rounded-lg bg-white/10">
-                <Bookmark className="h-5 w-5 text-white/80" />
-              </div>
-              <span className="text-[10px] font-black text-white/50 uppercase tracking-widest">Koleksi Eksklusif</span>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-black tracking-wider uppercase">
-              {collection.name}
-            </h1>
-            <p className="text-white/70 text-xs md:text-sm mt-3 max-w-2xl leading-relaxed">
-              {collection.description || "Koleksi eksklusif dari CORECULTURE."}
-            </p>
-            <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-4">
-              {filteredProducts.length} Produk dalam Koleksi ini
-            </p>
-          </div>
-        </header>
-      )}
-
-      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 w-full flex-grow animate-fade-in-up">
+      <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 w-full">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-8">
-          <Link href="/" className="hover:text-primary transition-colors">Home</Link>
+        <nav className="flex items-center gap-2 text-xs text-zinc-400 font-bold uppercase tracking-wider mb-8">
+          <Link href="/" className="hover:text-primary transition-colors">
+            BERANDA
+          </Link>
           <ChevronRight className="h-3 w-3" />
-          <Link href="/collections" className="hover:text-primary transition-colors">Collections</Link>
+          <Link href="/collections" className="hover:text-primary transition-colors">
+            KOLEKSI
+          </Link>
           <ChevronRight className="h-3 w-3" />
-          <span className="text-primary">{collection?.name || slug}</span>
-        </div>
+          <span className="text-primary font-black">
+            {collection ? collection.name : slug}
+          </span>
+        </nav>
 
-        {/* Pencarian */}
-        <div className="relative mb-10">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-zinc-400" />
+        {/* Header Koleksi */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-zinc-200 pb-6 mb-10">
+          <div>
+            <span className="inline-flex items-center gap-1 text-[10px] font-black tracking-widest text-primary uppercase bg-primary/10 px-2.5 py-1 rounded border border-primary/20">
+              <Bookmark className="h-3 w-3" /> Koleksi Eksklusif
+            </span>
+            <h1 className="text-3xl font-black tracking-widest text-zinc-900 uppercase mt-2">
+              {collection ? collection.name : "Koleksi Tidak Ditemukan"}
+            </h1>
+            {collection?.description && (
+              <p className="text-xs text-zinc-500 mt-1 max-w-2xl leading-relaxed">
+                {collection.description}
+              </p>
+            )}
+            <p className="text-[10px] text-zinc-400 mt-2 uppercase font-bold tracking-wider">
+              {filteredProducts.length} Produk dalam Koleksi Ini
+            </p>
           </div>
-          <input
-            type="text"
-            placeholder={`Cari di koleksi ${collection?.name || ""}...`}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="block w-full pl-10 pr-3 py-3.5 border border-zinc-200 rounded bg-zinc-50 text-zinc-900 placeholder-zinc-400 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-          />
-          {searchQuery && (
-            <button onClick={() => setSearchQuery("")} className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-zinc-800 cursor-pointer">
-              <X className="h-4 w-4" />
-            </button>
-          )}
+
+          {/* Search bar dalam koleksi */}
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+            <input
+              type="text"
+              placeholder="Cari dalam koleksi ini..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-zinc-50 border border-zinc-200 rounded-lg pl-9 pr-8 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-primary transition-all placeholder:text-zinc-400"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Grid Produk */}
+        {/* Konten Grid Produk */}
         {loading ? (
-          <div className="py-20 text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent" />
-            <p className="text-zinc-500 text-xs mt-4 uppercase tracking-widest animate-pulse">Memuat Produk Koleksi...</p>
+          <div className="py-32 text-center text-xs font-bold text-zinc-400 uppercase tracking-widest animate-pulse">
+            Memuat Produk Koleksi...
+          </div>
+        ) : !collection ? (
+          <div className="py-32 text-center space-y-4">
+            <h2 className="text-xl font-bold text-zinc-800 uppercase tracking-wider">
+              Koleksi Tidak Ditemukan
+            </h2>
+            <p className="text-xs text-zinc-400">
+              Koleksi dengan alamat ini tidak tersedia atau telah dihapus.
+            </p>
+            <Link
+              href="/collections"
+              className="inline-block text-xs text-white bg-primary px-6 py-3 font-black uppercase tracking-widest rounded hover:bg-primary-hover transition-colors"
+            >
+              Lihat Semua Koleksi
+            </Link>
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="py-20 text-center border border-dashed border-zinc-200 rounded-lg bg-zinc-50/50">
-            <Bookmark className="h-10 w-10 text-zinc-300 mx-auto mb-4" />
-            <h3 className="text-sm font-bold text-zinc-800 uppercase tracking-wider">Belum Ada Produk</h3>
-            <p className="text-xs text-zinc-400 mt-2">Koleksi ini belum memiliki produk terkait.</p>
-            <Link href="/collections" className="mt-6 inline-block text-xs text-white bg-primary px-4 py-2 font-bold hover:bg-primary-hover transition-colors uppercase rounded">
-              Lihat Koleksi Lain
+          <div className="py-32 text-center space-y-3 bg-zinc-50 rounded-xl border border-zinc-200/60 p-8">
+            <p className="text-sm font-bold text-zinc-600 uppercase tracking-wider">
+              Tidak Ada Produk
+            </p>
+            <p className="text-xs text-zinc-400">
+              {searchQuery
+                ? `Tidak ada produk yang cocok dengan pencarian "${searchQuery}".`
+                : "Belum ada produk yang dimasukkan ke dalam koleksi ini."}
+            </p>
+            <Link
+              href="/collections"
+              className="mt-6 inline-block text-xs text-white bg-primary px-4 py-2 font-bold hover:bg-primary-hover transition-colors uppercase rounded"
+            >
+              Lihat Koleksi Lainnya
             </Link>
           </div>
         ) : (
@@ -141,21 +162,11 @@ export default function CollectionPage({ params }: { params: Promise<{ slug: str
               <ProductCard
                 key={product.id}
                 product={product}
-                onOpenDetails={(p) => setSelectedProduct(p)}
               />
             ))}
           </div>
         )}
       </main>
-
-      {/* Modal Detail */}
-      {selectedProduct && (
-        <DetailModal
-          product={selectedProduct}
-          categoryName={getCategoryName(selectedProduct.categoryId)}
-          onClose={() => setSelectedProduct(null)}
-        />
-      )}
 
       <Footer />
     </div>

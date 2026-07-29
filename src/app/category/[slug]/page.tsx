@@ -5,7 +5,6 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import DetailModal from "@/components/DetailModal";
 import { Category, Product } from "@/types";
 import { Search, X, ChevronRight } from "lucide-react";
 
@@ -23,7 +22,6 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   // Fetch produk dan kategori dari API
   useEffect(() => {
@@ -59,63 +57,88 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
         p.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-  const getCategoryName = (categoryId: string) =>
-    categories.find((c) => c.id === categoryId)?.name || "Fashion";
-
   return (
-    <div className="flex flex-col min-h-screen bg-white text-zinc-950">
+    <div className="min-h-screen flex flex-col bg-white text-zinc-900 selection:bg-primary selection:text-white">
       <Navbar />
 
-      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 w-full flex-grow animate-fade-in-up">
-        {/* Breadcrumb navigasi */}
-        <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-8">
-          <Link href="/" className="hover:text-primary transition-colors">Home</Link>
+      <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 w-full">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 text-xs text-zinc-400 font-bold uppercase tracking-wider mb-8">
+          <Link href="/" className="hover:text-primary transition-colors">
+            BERANDA
+          </Link>
           <ChevronRight className="h-3 w-3" />
-          <Link href="/#katalog" className="hover:text-primary transition-colors">Shop</Link>
+          <span className="text-zinc-400">KATEGORI</span>
           <ChevronRight className="h-3 w-3" />
-          <span className="text-primary">{category?.name || slug}</span>
-        </div>
+          <span className="text-primary font-black">
+            {category ? category.name : slug}
+          </span>
+        </nav>
 
-        {/* Header kategori */}
-        <div className="border-b border-zinc-200 pb-6 mb-8">
-          <h1 className="text-3xl font-black text-zinc-900 tracking-wider uppercase">
-            {category?.name || slug}
-          </h1>
-          <p className="text-xs text-zinc-500 mt-2 uppercase">
-            {loading ? "Memuat..." : `${filteredProducts.length} Produk Ditemukan`}
-          </p>
-        </div>
-
-        {/* Pencarian dalam kategori */}
-        <div className="relative mb-10">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-zinc-400" />
+        {/* Header Kategori & Baris Pencarian */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-zinc-200 pb-6 mb-10">
+          <div>
+            <span className="text-[10px] font-black tracking-widest text-primary uppercase bg-primary/10 px-2.5 py-1 rounded border border-primary/20">
+              Koleksi Kategori
+            </span>
+            <h1 className="text-3xl font-black tracking-widest text-zinc-900 uppercase mt-2">
+              {category ? category.name : "Kategori Tidak Ditemukan"}
+            </h1>
+            <p className="text-xs text-zinc-400 mt-1 uppercase font-semibold">
+              {filteredProducts.length} Produk Tersedia
+            </p>
           </div>
-          <input
-            type="text"
-            placeholder={`Cari di kategori ${category?.name || ""}...`}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="block w-full pl-10 pr-3 py-3.5 border border-zinc-200 rounded bg-zinc-50 text-zinc-900 placeholder-zinc-400 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-          />
-          {searchQuery && (
-            <button onClick={() => setSearchQuery("")} className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-400 hover:text-zinc-800 cursor-pointer">
-              <X className="h-4 w-4" />
-            </button>
-          )}
+
+          {/* Search bar dalam kategori */}
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+            <input
+              type="text"
+              placeholder="Cari dalam kategori ini..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-zinc-50 border border-zinc-200 rounded-lg pl-9 pr-8 py-2.5 text-xs text-zinc-900 focus:outline-none focus:border-primary transition-all placeholder:text-zinc-400"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Grid Produk */}
+        {/* Konten Grid Produk */}
         {loading ? (
-          <div className="py-20 text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent" />
-            <p className="text-zinc-500 text-xs mt-4 uppercase tracking-widest animate-pulse">Memuat Produk...</p>
+          <div className="py-32 text-center text-xs font-bold text-zinc-400 uppercase tracking-widest animate-pulse">
+            Memuat Produk Kategori...
+          </div>
+        ) : !category ? (
+          <div className="py-32 text-center space-y-4">
+            <h2 className="text-xl font-bold text-zinc-800 uppercase tracking-wider">
+              Kategori Tidak Ditemukan
+            </h2>
+            <p className="text-xs text-zinc-400">
+              Kategori dengan alamat ini tidak ada atau telah dihapus.
+            </p>
+            <Link
+              href="/"
+              className="inline-block text-xs text-white bg-primary px-6 py-3 font-black uppercase tracking-widest rounded hover:bg-primary-hover transition-colors"
+            >
+              Kembali ke Beranda
+            </Link>
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="py-20 text-center border border-dashed border-zinc-200 rounded-lg bg-zinc-50/50">
-            <h3 className="text-sm font-bold text-zinc-800 uppercase tracking-wider">Belum Ada Produk</h3>
-            <p className="text-xs text-zinc-400 mt-2 max-w-xs mx-auto">
-              Kategori ini belum memiliki produk, atau tidak ada yang cocok dengan pencarian Anda.
+          <div className="py-32 text-center space-y-3 bg-zinc-50 rounded-xl border border-zinc-200/60 p-8">
+            <p className="text-sm font-bold text-zinc-600 uppercase tracking-wider">
+              Tidak Ada Produk
+            </p>
+            <p className="text-xs text-zinc-400">
+              {searchQuery
+                ? `Tidak ada produk yang cocok dengan pencarian "${searchQuery}".`
+                : "Belum ada produk dalam kategori ini."}
             </p>
             <Link href="/" className="mt-6 inline-block text-xs text-white bg-primary px-4 py-2 font-bold hover:bg-primary-hover transition-colors uppercase rounded">
               Kembali ke Beranda
@@ -127,21 +150,11 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
               <ProductCard
                 key={product.id}
                 product={product}
-                onOpenDetails={(p) => setSelectedProduct(p)}
               />
             ))}
           </div>
         )}
       </main>
-
-      {/* Modal Detail Produk */}
-      {selectedProduct && (
-        <DetailModal
-          product={selectedProduct}
-          categoryName={getCategoryName(selectedProduct.categoryId)}
-          onClose={() => setSelectedProduct(null)}
-        />
-      )}
 
       <Footer />
     </div>
