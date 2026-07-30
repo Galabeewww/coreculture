@@ -33,12 +33,12 @@ export default function PhotoshootSlideshow() {
 
   const photos: PhotoshootImage[] = edition?.photos || [];
 
-  // Rotasi otomatis setiap 4 detik
+  // Rotasi otomatis setiap 2.5 detik
   useEffect(() => {
     if (!isPlaying || photos.length <= 1) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % photos.length);
-    }, 4000); // 4 detik per foto
+    }, 2500); // 2.5 detik per foto
 
     return () => clearInterval(timer);
   }, [isPlaying, photos.length]);

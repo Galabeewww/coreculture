@@ -459,23 +459,40 @@ export default function AdminProducts() {
           >
             <Plus className="h-4 w-4" /> TAMBAH PRODUK BARU
           </button>
-          {products.length > 0 && (
-            <button
-              onClick={handleDeleteAllProducts}
-              className="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
-            >
-              <Trash2 size={14} /> HAPUS SEMUA PRODUK
-            </button>
-          )}
         </div>
       </div>
 
       {/* Tabel Produk */}
       <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden shadow-sm">
+        {/* <div className="px-6 py-5 border-b border-zinc-200 bg-zinc-50/50">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-xs font-black text-zinc-800 tracking-widest uppercase">
+              DAFTAR KATALOG
+            </h3>
+            {products.length > 0 && (
+              <button
+                onClick={handleDeleteAllProducts}
+                className="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
+              >
+                <Trash2 size={14} /> HAPUS SEMUA PRODUK
+              </button>
+            )}
+          </div>
+        </div> */}
         <div className="px-6 py-5 border-b border-zinc-200 bg-zinc-50/50">
-          <h3 className="text-xs font-black text-zinc-800 tracking-widest uppercase">
-            DAFTAR KATALOG
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-black text-zinc-800 tracking-widest uppercase">
+              DAFTAR KATALOG
+            </h3>
+            {products.length > 0 && (
+              <button
+                onClick={handleDeleteAllProducts}
+                className="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
+              >
+                <Trash2 size={14} /> HAPUS SEMUA PRODUK
+              </button>
+            )}
+          </div>
         </div>
 
         {loading ? (

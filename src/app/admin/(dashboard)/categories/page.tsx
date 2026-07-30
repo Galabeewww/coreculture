@@ -290,14 +290,6 @@ export default function AdminCategories() {
           >
             <FileText size={14} /> PDF
           </button>
-          {categories.length > 0 && (
-            <button
-              onClick={handleDeleteAllCategories}
-              className="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
-            >
-              <Trash2 size={14} /> HAPUS SEMUA KATEGORI
-            </button>
-          )}
         </div>
       </div>
 
@@ -343,6 +335,14 @@ export default function AdminCategories() {
             <h3 className="text-xs font-black text-zinc-800 tracking-widest uppercase">
               DAFTAR KATEGORI ({categories.length})
             </h3>
+            {categories.length > 0 && (
+              <button
+                onClick={handleDeleteAllCategories}
+                className="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
+              >
+                <Trash2 size={14} /> HAPUS SEMUA KATEGORI
+              </button>
+            )}
           </div>
 
           {loading ? (

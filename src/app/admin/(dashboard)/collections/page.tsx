@@ -332,14 +332,6 @@ export default function AdminCollectionsPage() {
           >
             <FileText size={14} /> PDF
           </button>
-          {collections.length > 0 && (
-            <button
-              onClick={handleDeleteAllCollections}
-              className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
-            >
-              <Trash2 size={14} /> HAPUS SEMUA KOLEKSI
-            </button>
-          )}
         </div>
       </div>
 
@@ -392,9 +384,14 @@ export default function AdminCollectionsPage() {
             <span className="text-xs font-black text-zinc-700 uppercase tracking-wider">
               Daftar Koleksi
             </span>
-            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-              {Array.isArray(collections) ? collections.length : 0} Koleksi
-            </span>
+            {collections.length > 0 && (
+              <button
+                onClick={handleDeleteAllCollections}
+                className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 shadow-xs cursor-pointer"
+              >
+                <Trash2 size={14} /> HAPUS SEMUA KOLEKSI
+              </button>
+            )}
           </div>
 
           {loading ? (
